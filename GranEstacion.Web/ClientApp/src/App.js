@@ -1,15 +1,15 @@
-import React from 'react';
-import { Container } from 'reactstrap';
-import { Home } from './components/Home';
+import React from "react";
+import { Container } from "reactstrap";
+import { Home } from "./components/home";
 
-import './custom.css'
+import "./custom.css";
 
 const App = () => {
-  return (
-    <Container>
-      <Home />
-    </Container>
-  );
-}
+	return (
+		<Container>
+			<Home />
+		</Container>
+	);
+};
 
 export default App;

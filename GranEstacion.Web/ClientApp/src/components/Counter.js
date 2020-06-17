@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useState } from "react";
 
 export const Counter = () => {
+	const [currentCount, setCurrentCount] = useState(12);
+
 	return (
-		<section>
-			ds
-		</section>
-	)
-}
+		<div>
+			<h3>Personas en el Centro Comercial.</h3>
+			<h1>{currentCount}</h1>
+		</div>
+	);
+};
