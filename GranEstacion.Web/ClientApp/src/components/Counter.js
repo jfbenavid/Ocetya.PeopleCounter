@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
+import { CounterDiv } from "./styles/counter";
 
-export const Counter = () => {
-	const [currentCount, setCurrentCount] = useState(12);
-
+export const Counter = ({ currentCount }) => {
 	return (
-		<div>
+		<CounterDiv>
 			<h3>Personas en el Centro Comercial.</h3>
 			<h1>{currentCount}</h1>
-		</div>
+		</CounterDiv>
 	);
 };
