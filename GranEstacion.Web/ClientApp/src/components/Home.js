@@ -14,14 +14,8 @@ export const Home = () => {
 		label: "Personas",
 		data: [],
 	});
-
-	useInterval(() => {
-		setCurrentPeople(Math.round(Math.random() * 90));
-		setChartData({
-			...chartData,
-			data: [...chartData.data, [new Date(), currentPeople]],
-		});
-	}, config.REFRESH_IN_SECONDS * 1000);
+	const maxDataShown = config.MAX_DATA_SHOWN_IN_MINUTES * 60;
+	const refreshIntervalMilliseconds = config.REFRESH_IN_SECONDS * 1000;
 
 	const data = useMemo(
 		() => [
@@ -31,6 +25,23 @@ export const Home = () => {
 		],
 		[chartData]
 	);
+
+	useInterval(() => {
+		setCurrentPeople(Math.round(Math.random() * 90));
+		if (chartData.data.length > maxDataShown) {
+			chartData.data.shift();
+			const newData = chartData.data;
+			setChartData({
+				...chartData,
+				data: [...newData, [new Date(), currentPeople]],
+			});
+		} else {
+			setChartData({
+				...chartData,
+				data: [...chartData.data, [new Date(), currentPeople]],
+			});
+		}
+	}, refreshIntervalMilliseconds);
 
 	return (
 		<>
