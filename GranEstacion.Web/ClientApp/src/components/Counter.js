@@ -1,11 +1,15 @@
 import React from "react";
-import { CounterDiv } from "./styles/counter";
+import { CounterDiv, MaxDiv, H1, H4, H5, Span } from "./styles/counter";
 
-export const Counter = ({ currentCount }) => {
+export const Counter = ({ currentCount, maxPeople }) => {
 	return (
 		<CounterDiv>
-			<h3>Personas en el Centro Comercial.</h3>
-			<h1>{currentCount}</h1>
+			<H4>Personas en el Centro Comercial.</H4>
+			<H1 max={maxPeople}>{currentCount}</H1>
+			<MaxDiv>
+				<Span>Maximo</Span>
+				<H5>{maxPeople}</H5>
+			</MaxDiv>
 		</CounterDiv>
 	);
 };

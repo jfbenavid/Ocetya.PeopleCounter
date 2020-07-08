@@ -7,12 +7,13 @@ import { useInterval, config } from "../util";
 import { SideInfo } from "./side-info";
 import GELogo from "../images/GE.jpeg";
 import { ImgLogo } from "./styles/logo";
+import { Row, Col } from "reactstrap";
 
 export const Home = () => {
 	const [currentPeople, setCurrentPeople] = useState(10);
 	const [chartData, setChartData] = useState({
 		label: "Personas",
-		data: [],
+		data: [[new Date(), currentPeople]],
 	});
 	const maxDataShown = config.MAX_DATA_SHOWN_IN_MINUTES * 60;
 	const refreshIntervalMilliseconds = config.REFRESH_IN_SECONDS * 1000;
@@ -47,10 +48,26 @@ export const Home = () => {
 		<>
 			<Header>
 				<ImgLogo src={GELogo} alt="Gran Estacion" />
-				<Counter currentCount={currentPeople} />
+				<Counter
+					currentCount={currentPeople}
+					maxPeople={config.MAX_PEOPLE_ALLOWED}
+				/>
 				<SideInfo />
 			</Header>
-			<LineChart data={data} />
+			<Row>
+				<Col>
+					<LineChart data={data} />
+				</Col>
+			</Row>
+			<br />
+			<Row>
+				<Col>
+					<LineChart data={data} />
+				</Col>
+				<Col>
+					<LineChart data={data} />
+				</Col>
+			</Row>
 		</>
 	);
 };
