@@ -5,5 +5,5 @@ export const DivLogo = styled.div`
 `;
 
 export const ImgLogo = styled.img`
-	width: 150px;
+	width: 175px;
 `;

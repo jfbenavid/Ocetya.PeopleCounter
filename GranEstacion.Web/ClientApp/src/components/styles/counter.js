@@ -1,25 +1,26 @@
 import styled from "styled-components";
 
+const border = 9;
+
 export const CounterDiv = styled.div`
+	border: green solid ${border}px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
+	padding: 5px;
 `;
 
 export const MaxDiv = styled.div`
+	border-top: ${border}px solid green;
 	align-items: center;
 	display: flex;
-	justify-content: space-between;
+	justify-content: center;
+	color: red;
+	width: 100%;
 `;
 
 export const H1 = styled.h1`
-	color: ${({ max, children }) => {
-		const div = max / 3;
-		if (children < div) return "black";
-		else if (children < div * 2) return "yellow";
-		else return "red";
-	}};
 	font-size: 5.1rem;
 	margin-bottom: 0;
 `;
@@ -29,7 +30,6 @@ export const H4 = styled.h4`
 `;
 
 export const H5 = styled.h5`
-	color: limegreen;
 	margin-bottom: 0;
 `;
 
