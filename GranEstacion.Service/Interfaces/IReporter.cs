@@ -1,13 +1,12 @@
 ﻿namespace GranEstacion.Service.Interfaces
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+    using GranEstacion.Service.Models;
+    using OpenPop.Pop3;
     using System.Threading.Tasks;
 
     public interface IReporter
     {
-        Task GetAttachedFile();
+        Task GetAttachedFileAsync();
 
         Task SaveData();
     }

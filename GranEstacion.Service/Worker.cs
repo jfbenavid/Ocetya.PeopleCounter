@@ -1,8 +1,6 @@
 namespace GranEstacion.Service
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using GranEstacion.Service.Interfaces;
@@ -25,7 +23,9 @@ namespace GranEstacion.Service
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await _reporter.GetAttachedFile();
+
+                await _reporter.GetAttachedFileAsync();
+
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }

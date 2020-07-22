@@ -1,51 +1,49 @@
 ﻿namespace GranEstacion.Service
 {
     using GranEstacion.Service.Interfaces;
-    using Limilabs.Client.POP3;
-    using Limilabs.Mail;
-    using Limilabs.Mail.MIME;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
+    using OpenPop.Pop3;
     using System;
     using System.Threading.Tasks;
 
-    public class Reporter : IReporter
+    public class Reporter : MailHandler, IReporter
     {
         private readonly ILogger<Worker> _logger;
         private readonly IConfiguration _configuration;
 
         public Reporter(ILogger<Worker> logger, IConfiguration configuration)
+            : base(logger, configuration)
         {
             _logger = logger;
             _configuration = configuration;
         }
 
-        public async Task GetAttachedFile()
+        public async Task GetAttachedFileAsync()
         {
-            using Pop3 pop3 = new Pop3();
+            Pop3Client pop3 = new Pop3Client();
 
             try
             {
                 string host = _configuration["EmailConfiguration:Host"];
-                int port = _configuration.GetValue<int>("EmailConfiguration:Port");
-                string user = _configuration["EmailConfiguration:User"];
+                string user = $"recent:{_configuration["EmailConfiguration:User"]}";
                 string pass = _configuration["EmailConfiguration:Pass"];
+                int port = _configuration.GetValue<int>("EmailConfiguration:Port");
+                int messageNumber = 1;
 
-                pop3.ConnectSSL(host, port);
-                pop3.UseBestLogin(user, pass);
+                pop3.Connect(host, port, true);
+                pop3.Authenticate(user, pass);
 
-                foreach (string uid in pop3.GetAll())
+                var message = await GetEmailContentAsync(messageNumber, ref pop3);
+
+                if (message != null)
                 {
-                    IMail email = new MailBuilder()
-                        .CreateFromEml(pop3.GetMessageByUID(uid));
-
-                    Console.WriteLine(email.Subject);
-
-                    // save all attachments to disk
-                    foreach (MimeData mime in email.Attachments)
+                    if (_configuration.GetValue<bool>("EmailConfiguration:DownloadAttachment:Enabled"))
                     {
-                        mime.Save(mime.SafeFileName);
+                        await DownloadFile(message);
                     }
+
+                    await SaveData();
                 }
             }
             catch (Exception ex)
@@ -54,7 +52,7 @@
             }
             finally
             {
-                pop3.Close();
+                pop3.Disconnect();
                 pop3.Dispose();
             }
         }
