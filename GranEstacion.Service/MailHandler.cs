@@ -1,6 +1,8 @@
 ﻿namespace GranEstacion.Service
 {
     using GranEstacion.Service.Models;
+    using MailKit;
+    using MailKit.Net.Imap;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using OpenPop.Mime;
@@ -9,6 +11,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public abstract class MailHandler
@@ -22,7 +25,7 @@
             _configuration = configuration;
         }
 
-        public Task<MessageModel> GetEmailContentAsync(int messageNumber, ref Pop3Client pop3)
+        public Task<POPMessage> GetEmailContentPOPAsync(int messageNumber, ref Pop3Client pop3)
         {
             Message message = pop3.GetMessage(messageNumber);
             List<MessagePart> attachment = message.FindAllAttachments();
@@ -30,14 +33,14 @@
             if (attachment.Count <= 0 || !attachment[0].FileName.EndsWith(".csv"))
             {
                 pop3.DeleteMessage(messageNumber);
-                return Task.FromResult<MessageModel>(null);
+                return Task.FromResult<POPMessage>(null);
             }
 
             MessagePart HTMLTextPart = message.FindFirstHtmlVersion();
             MessagePart plainTextPart = message.FindFirstPlainTextVersion();
             MessageHeader header = message.Headers;
 
-            MessageModel result = new MessageModel
+            POPMessage result = new POPMessage
             {
                 MessageID = header.MessageId == null ? "" : header.MessageId.Trim(),
                 FromID = header.From.Address.Trim(),
@@ -56,7 +59,21 @@
             return Task.FromResult(result);
         }
 
-        public async Task DownloadFile(MessageModel message)
+        public Task<ImapMessage> GetEmailContentImapAsync(IMessageSummary message, ref ImapClient client)
+        {
+            if (message.Attachments.ToList().Count <= 0)
+            {
+                return null;
+            }
+
+            foreach (var header in message.Headers)
+            {
+            }
+
+            return null;
+        }
+
+        public async Task DownloadFile(POPMessage message)
         {
             IList<MessagePart> attachments = message.Attachment;
 

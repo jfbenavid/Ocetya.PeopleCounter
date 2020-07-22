@@ -1,6 +1,9 @@
 ﻿namespace GranEstacion.Service
 {
     using GranEstacion.Service.Interfaces;
+    using MailKit;
+    using MailKit.Net.Imap;
+    using MailKit.Search;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using OpenPop.Pop3;
@@ -21,29 +24,38 @@
 
         public async Task GetAttachedFileAsync()
         {
-            Pop3Client pop3 = new Pop3Client();
+            ImapClient client = new ImapClient();
 
             try
             {
                 string host = _configuration["EmailConfiguration:Host"];
-                string user = $"recent:{_configuration["EmailConfiguration:User"]}";
+                string user = _configuration["EmailConfiguration:User"];
                 string pass = _configuration["EmailConfiguration:Pass"];
                 int port = _configuration.GetValue<int>("EmailConfiguration:Port");
-                int messageNumber = 1;
 
-                pop3.Connect(host, port, true);
-                pop3.Authenticate(user, pass);
+                await client.ConnectAsync(host, port, true);
+                await client.AuthenticateAsync(user, pass);
 
-                var message = await GetEmailContentAsync(messageNumber, ref pop3);
+                var inbox = client.Inbox;
 
-                if (message != null)
+                await inbox.OpenAsync(FolderAccess.ReadWrite);
+                var uids = await inbox.SearchAsync(SearchQuery.FromContains("jfbenavid@hotmail.com").And(SearchQuery.NotSeen));
+
+                var messages = await inbox.FetchAsync(uids, MessageSummaryItems.BodyStructure);
+
+                if (messages != null)
                 {
-                    if (_configuration.GetValue<bool>("EmailConfiguration:DownloadAttachment:Enabled"))
+                    foreach (var message in messages)
                     {
-                        await DownloadFile(message);
-                    }
+                        if (_configuration.GetValue<bool>("EmailConfiguration:DownloadAttachment:Enabled"))
+                        {
+                            //await DownloadFile(message);
+                        }
 
-                    await SaveData();
+                        inbox.AddFlags(message.UniqueId, MessageFlags.Seen, true);
+
+                        await SaveData();
+                    }
                 }
             }
             catch (Exception ex)
@@ -52,8 +64,8 @@
             }
             finally
             {
-                pop3.Disconnect();
-                pop3.Dispose();
+                client.Disconnect(true);
+                client.Dispose();
             }
         }
 

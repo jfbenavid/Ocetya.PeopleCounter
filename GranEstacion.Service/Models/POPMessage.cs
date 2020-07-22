@@ -3,7 +3,7 @@
     using OpenPop.Mime;
     using System.Collections.Generic;
 
-    public class MessageModel
+    public class POPMessage
     {
         public string MessageID;
         public string FromID;
