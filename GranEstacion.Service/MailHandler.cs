@@ -25,10 +25,17 @@
         public Task<MessageModel> GetEmailContentAsync(int messageNumber, ref Pop3Client pop3)
         {
             Message message = pop3.GetMessage(messageNumber);
+            List<MessagePart> attachment = message.FindAllAttachments();
+
+            if (attachment.Count <= 0 || !attachment[0].FileName.EndsWith(".csv"))
+            {
+                pop3.DeleteMessage(messageNumber);
+                return Task.FromResult<MessageModel>(null);
+            }
+
             MessagePart HTMLTextPart = message.FindFirstHtmlVersion();
             MessagePart plainTextPart = message.FindFirstPlainTextVersion();
             MessageHeader header = message.Headers;
-            List<MessagePart> attachment = message.FindAllAttachments();
 
             MessageModel result = new MessageModel
             {
