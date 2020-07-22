@@ -1,5 +1,6 @@
 namespace GranEstacion.Service
 {
+    using GranEstacion.Service.Interfaces;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -22,9 +23,13 @@ namespace GranEstacion.Service
                         .AddHostedService<Worker>()
                         .Configure<EventLogSettings>(config =>
                         {
-                            config.LogName = "Sample Service";
-                            config.SourceName = "Sample Service Source";
+                            config.LogName = "People Counter Service";
+                            config.SourceName = "People Counter";
                         });
+
+                    //Dependency Injection
+                    services
+                        .AddTransient<IReporter, Reporter>();
                 }).UseWindowsService();
     }
 }

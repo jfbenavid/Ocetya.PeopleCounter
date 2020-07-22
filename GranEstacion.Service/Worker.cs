@@ -5,16 +5,19 @@ namespace GranEstacion.Service
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using GranEstacion.Service.Interfaces;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly IReporter _reporter;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(ILogger<Worker> logger, IReporter reporter)
         {
             _logger = logger;
+            _reporter = reporter;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -22,7 +25,8 @@ namespace GranEstacion.Service
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                await _reporter.GetAttachedFile();
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
     }
