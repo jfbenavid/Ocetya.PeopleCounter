@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  granestacion.service:
+    image: ${DOCKER_REGISTRY-}granestacionservice
+    build:
+      context: .
+      dockerfile: GranEstacion.Service\Dockerfile

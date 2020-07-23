@@ -6,7 +6,6 @@
     using MailKit.Search;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
-    using OpenPop.Pop3;
     using System;
     using System.Threading.Tasks;
 
@@ -16,7 +15,6 @@
         private readonly IConfiguration _configuration;
 
         public Reporter(ILogger<Worker> logger, IConfiguration configuration)
-            : base(logger, configuration)
         {
             _logger = logger;
             _configuration = configuration;
@@ -32,7 +30,6 @@
                 string user = _configuration["EmailConfiguration:User"];
                 string pass = _configuration["EmailConfiguration:Pass"];
                 int port = _configuration.GetValue<int>("EmailConfiguration:Port");
-                bool downloadAttachments = _configuration.GetValue<bool>("EmailConfiguration:DownloadAttachment:Enabled");
 
                 await client.ConnectAsync(host, port, true);
                 await client.AuthenticateAsync(user, pass);
@@ -45,12 +42,7 @@
                 {
                     var message = await inbox.GetMessageAsync(uid);
 
-                    var x = await GetEmailContentImapAsync(message);
-
-                    if (downloadAttachments)
-                    {
-                        //await DownloadFile(message);
-                    }
+                    await GetEmailContentImapAsync(message);
 
                     inbox.AddFlags(uid, MessageFlags.Seen, true);
                 }

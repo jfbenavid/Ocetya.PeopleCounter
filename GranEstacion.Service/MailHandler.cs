@@ -1,33 +1,18 @@
 ﻿namespace GranEstacion.Service
 {
-    using GranEstacion.Service.Models;
-    using MailKit;
-    using MailKit.Net.Imap;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Logging;
     using MimeKit;
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
 
     public abstract class MailHandler
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IConfiguration _configuration;
-
-        public MailHandler(ILogger<Worker> logger, IConfiguration configuration)
-        {
-            _logger = logger;
-            _configuration = configuration;
-        }
-
-        public async Task<ImapMessage> GetEmailContentImapAsync(MimeMessage message)
+        protected async Task GetEmailContentImapAsync(MimeMessage message)
         {
             if (message.Attachments.ToList().Count <= 0)
             {
-                return null;
+                return;
             }
 
             foreach (var attachment in message.Attachments)
@@ -50,8 +35,6 @@
                     }
                 }
             }
-
-            return null;
         }
 
         private async Task<byte[]> GetBytesArrayToRead(MimePart attachment)

@@ -1,11 +1,11 @@
 namespace GranEstacion.Service
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using GranEstacion.Service.Interfaces;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class Worker : BackgroundService
     {
@@ -26,7 +26,7 @@ namespace GranEstacion.Service
 
                 await _reporter.GetAttachedFileAsync();
 
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
     }
