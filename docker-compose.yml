@@ -1,8 +1,34 @@
 version: '3.4'
 
+volumes:
+  db_volume:
+    name: db_volume
 services:
+  db:
+    image: postgres
+    container_name: GranEstacion.DB
+    environment:
+      POSTGRES_USER: "geadmin"
+      POSTGRES_PASSWORD: "Th1sIs4Pa5sw0rd"
+      POSTGRES_DB: "DB"
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
   granestacion.service:
     image: ${DOCKER_REGISTRY-}granestacionservice
+    depends_on:
+      - db
     build:
       context: .
       dockerfile: GranEstacion.Service\Dockerfile
+  granestacion.web:
+    image: ${DOCKER_REGISTRY-}granestacionweb
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: GranEstacion.Web\Dockerfile
+    ports:
+      - "8080:80"
+      - "8000:443"
