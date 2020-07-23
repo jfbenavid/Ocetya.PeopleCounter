@@ -5,9 +5,7 @@
     using MailKit.Net.Imap;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
-    using OpenPop.Mime;
-    using OpenPop.Mime.Header;
-    using OpenPop.Pop3;
+    using MimeKit;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -25,70 +23,43 @@
             _configuration = configuration;
         }
 
-        public Task<POPMessage> GetEmailContentPOPAsync(int messageNumber, ref Pop3Client pop3)
-        {
-            Message message = pop3.GetMessage(messageNumber);
-            List<MessagePart> attachment = message.FindAllAttachments();
-
-            if (attachment.Count <= 0 || !attachment[0].FileName.EndsWith(".csv"))
-            {
-                pop3.DeleteMessage(messageNumber);
-                return Task.FromResult<POPMessage>(null);
-            }
-
-            MessagePart HTMLTextPart = message.FindFirstHtmlVersion();
-            MessagePart plainTextPart = message.FindFirstPlainTextVersion();
-            MessageHeader header = message.Headers;
-
-            POPMessage result = new POPMessage
-            {
-                MessageID = header.MessageId == null ? "" : header.MessageId.Trim(),
-                FromID = header.From.Address.Trim(),
-                FromName = header.From.DisplayName.Trim(),
-                Subject = header.Subject.Trim(),
-                Body = (plainTextPart == null ? "" : plainTextPart.GetBodyAsText().Trim()),
-                Html = (HTMLTextPart == null ? "" : HTMLTextPart.GetBodyAsText().Trim())
-            };
-
-            if (attachment.Count > 0)
-            {
-                result.FileName = attachment[0].FileName.Trim();
-                result.Attachment = attachment;
-            }
-
-            return Task.FromResult(result);
-        }
-
-        public Task<ImapMessage> GetEmailContentImapAsync(IMessageSummary message, ref ImapClient client)
+        public async Task<ImapMessage> GetEmailContentImapAsync(MimeMessage message)
         {
             if (message.Attachments.ToList().Count <= 0)
             {
                 return null;
             }
 
-            foreach (var header in message.Headers)
+            foreach (var attachment in message.Attachments)
             {
+                if (attachment is MimePart part)
+                {
+                    var fileName = part.FileName;
+                    if (!fileName.EndsWith(".csv"))
+                        continue;
+
+                    var bytes = await GetBytesArrayToRead(part);
+
+                    using var stream = new MemoryStream(bytes);
+                    using var reader = new StreamReader(stream);
+                    string line = string.Empty;
+
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        Console.WriteLine(line);
+                    }
+                }
             }
 
             return null;
         }
 
-        public async Task DownloadFile(POPMessage message)
+        private async Task<byte[]> GetBytesArrayToRead(MimePart attachment)
         {
-            IList<MessagePart> attachments = message.Attachment;
+            using var stream = new MemoryStream();
+            await attachment.Content.DecodeToAsync(stream);
 
-            try
-            {
-                foreach (var attachment in attachments)
-                {
-                    byte[] content = attachment.Body;
-                    await File.WriteAllBytesAsync($"{_configuration["EmailConfiguration:DownloadAttachment:Path"]}/{message.FileName}", attachment.Body);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-            }
+            return stream.ToArray();
         }
     }
 }

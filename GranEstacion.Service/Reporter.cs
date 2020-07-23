@@ -32,30 +32,27 @@
                 string user = _configuration["EmailConfiguration:User"];
                 string pass = _configuration["EmailConfiguration:Pass"];
                 int port = _configuration.GetValue<int>("EmailConfiguration:Port");
+                bool downloadAttachments = _configuration.GetValue<bool>("EmailConfiguration:DownloadAttachment:Enabled");
 
                 await client.ConnectAsync(host, port, true);
                 await client.AuthenticateAsync(user, pass);
 
                 var inbox = client.Inbox;
-
                 await inbox.OpenAsync(FolderAccess.ReadWrite);
                 var uids = await inbox.SearchAsync(SearchQuery.FromContains("jfbenavid@hotmail.com").And(SearchQuery.NotSeen));
 
-                var messages = await inbox.FetchAsync(uids, MessageSummaryItems.BodyStructure);
-
-                if (messages != null)
+                foreach (var uid in uids)
                 {
-                    foreach (var message in messages)
+                    var message = await inbox.GetMessageAsync(uid);
+
+                    var x = await GetEmailContentImapAsync(message);
+
+                    if (downloadAttachments)
                     {
-                        if (_configuration.GetValue<bool>("EmailConfiguration:DownloadAttachment:Enabled"))
-                        {
-                            //await DownloadFile(message);
-                        }
-
-                        inbox.AddFlags(message.UniqueId, MessageFlags.Seen, true);
-
-                        await SaveData();
+                        //await DownloadFile(message);
                     }
+
+                    inbox.AddFlags(uid, MessageFlags.Seen, true);
                 }
             }
             catch (Exception ex)
