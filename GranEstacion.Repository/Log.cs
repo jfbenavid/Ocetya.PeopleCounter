@@ -14,6 +14,8 @@
 
         public int CameraId { get; set; }
 
+        public Camera Camera { get; set; }
+
         public int Entered { get; set; }
 
         public int Exited { get; set; }

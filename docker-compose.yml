@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_USER: "geadmin"
       POSTGRES_PASSWORD: "Th1sIs4Pa5sw0rd"
-      POSTGRES_DB: "DB"
+      POSTGRES_DB: "CamerasDB"
     volumes:
       - db_volume:/var/lib/postgresql/data
     ports:

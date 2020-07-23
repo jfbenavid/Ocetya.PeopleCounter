@@ -14,7 +14,7 @@
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseNpgsql(_configuration.GetConnectionString("MigrationConnection"));
+            options.UseNpgsql(_configuration.GetConnectionString("DB"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

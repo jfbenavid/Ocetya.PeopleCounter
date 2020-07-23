@@ -1,5 +1,6 @@
 namespace GranEstacion.Service
 {
+    using GranEstacion.Repository;
     using GranEstacion.Service.Interfaces;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -41,7 +42,7 @@ namespace GranEstacion.Service
                             config.SourceName = "People Counter";
                         });
 
-                    services.AddEntityFrameworkNpgsql().AddDbContext<DbContext>(options =>
+                    services.AddEntityFrameworkNpgsql().AddDbContext<GranEstacionContext>(options =>
                         options.UseNpgsql(_configuration.GetConnectionString("DB")));
 
                     //Dependency Injection

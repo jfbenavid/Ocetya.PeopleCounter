@@ -1,5 +1,6 @@
 namespace GranEstacion.Web
 {
+    using GranEstacion.Repository;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -22,7 +23,7 @@ namespace GranEstacion.Web
         {
             services.AddControllersWithViews();
 
-            services.AddEntityFrameworkNpgsql().AddDbContext<DbContext>(options =>
+            services.AddEntityFrameworkNpgsql().AddDbContext<GranEstacionContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DB")));
 
             // In production, the React files will be served from this directory
