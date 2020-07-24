@@ -1,6 +1,6 @@
 ﻿namespace GranEstacion.Service
 {
-    using GranEstacion.Repository;
+    using GranEstacion.Service.Config;
     using GranEstacion.Service.Interfaces;
     using MailKit;
     using MailKit.Net.Imap;
@@ -17,7 +17,7 @@
         private readonly IConfiguration _configuration;
 
         public Reporter(ILogger<Worker> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
-            : base(logger, configuration, serviceScopeFactory)
+            : base(logger, serviceScopeFactory)
         {
             _logger = logger;
             _configuration = configuration;
@@ -29,11 +29,11 @@
 
             try
             {
-                string host = _configuration["EmailConfiguration:Host"];
-                string user = _configuration["EmailConfiguration:User"];
-                string pass = _configuration["EmailConfiguration:Pass"];
-                string from = _configuration["EmailConfiguration:From"];
-                int port = _configuration.GetValue<int>("EmailConfiguration:Port");
+                string host = _configuration[MailConfiguration.HOST];
+                string user = _configuration[MailConfiguration.USER];
+                string pass = _configuration[MailConfiguration.PASSWORD];
+                string from = _configuration[MailConfiguration.MAIL_FROM];
+                int port = _configuration.GetValue<int>(MailConfiguration.PORT);
 
                 await client.ConnectAsync(host, port, true);
                 await client.AuthenticateAsync(user, pass);
@@ -60,11 +60,6 @@
                 client.Disconnect(true);
                 client.Dispose();
             }
-        }
-
-        public async Task SaveData()
-        {
-            throw new NotImplementedException();
         }
     }
 }

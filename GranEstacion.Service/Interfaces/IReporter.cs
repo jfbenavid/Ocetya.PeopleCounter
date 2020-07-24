@@ -5,7 +5,5 @@
     public interface IReporter
     {
         Task GetAttachedFileAsync();
-
-        Task SaveData();
     }
 }

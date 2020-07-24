@@ -35,7 +35,7 @@ namespace GranEstacion.Service
                     var _configuration = LoadConfiguration();
 
                     var optionsBuilder = new DbContextOptionsBuilder<GranEstacionContext>();
-                    optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Mig"));
+                    optionsBuilder.UseNpgsql(_configuration.GetConnectionString(ConnectionStrings.DB));
                     services.AddScoped(s => new GranEstacionContext(optionsBuilder.Options));
 
                     services

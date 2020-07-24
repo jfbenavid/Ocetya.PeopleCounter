@@ -26,7 +26,7 @@ namespace GranEstacion.Web
             services
                 .AddEntityFrameworkNpgsql()
                 .AddDbContext<GranEstacionContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("DB")));
+                    options.UseNpgsql(Configuration.GetConnectionString(ConnectionStrings.DB)));
 
             // In production, the React files will be served from this directory
             services
