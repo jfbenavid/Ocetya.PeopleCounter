@@ -9,6 +9,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1903 AS build
 WORKDIR /src
 COPY ["GranEstacion.Service/GranEstacion.Service.csproj", "GranEstacion.Service/"]
+COPY ["GranEstacion.Repository/GranEstacion.Repository.csproj", "GranEstacion.Repository/"]
 RUN dotnet restore "GranEstacion.Service/GranEstacion.Service.csproj"
 COPY . .
 WORKDIR "/src/GranEstacion.Service"

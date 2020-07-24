@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GranEstacion.Repository.Migrations
 {
     [DbContext(typeof(GranEstacionContext))]
-    [Migration("20200723222800_Initial")]
+    [Migration("20200724013203_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

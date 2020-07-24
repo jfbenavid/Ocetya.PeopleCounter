@@ -1,20 +1,11 @@
 ﻿namespace GranEstacion.Repository
 {
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
 
     public class GranEstacionContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-
-        public GranEstacionContext(IConfiguration configuration)
+        public GranEstacionContext(DbContextOptions<GranEstacionContext> options) : base(options)
         {
-            _configuration = configuration;
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            options.UseNpgsql(_configuration.GetConnectionString("DB"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -12,9 +12,9 @@
 
         public DateTime Date { get; set; }
 
-        public int CameraId { get; set; }
-
         public Camera Camera { get; set; }
+
+        public int CameraId { get; set; }
 
         public int Entered { get; set; }
 

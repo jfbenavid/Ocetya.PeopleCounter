@@ -34,6 +34,10 @@ namespace GranEstacion.Service
                 {
                     var _configuration = LoadConfiguration();
 
+                    var optionsBuilder = new DbContextOptionsBuilder<GranEstacionContext>();
+                    optionsBuilder.UseNpgsql(_configuration.GetConnectionString("Mig"));
+                    services.AddScoped(s => new GranEstacionContext(optionsBuilder.Options));
+
                     services
                         .AddHostedService<Worker>()
                         .Configure<EventLogSettings>(config =>
@@ -41,9 +45,6 @@ namespace GranEstacion.Service
                             config.LogName = "People Counter Service";
                             config.SourceName = "People Counter";
                         });
-
-                    services.AddEntityFrameworkNpgsql().AddDbContext<GranEstacionContext>(options =>
-                        options.UseNpgsql(_configuration.GetConnectionString("DB")));
 
                     //Dependency Injection
                     services
