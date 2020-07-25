@@ -1,6 +1,6 @@
 import React from "react";
 import { Container } from "reactstrap";
-import { Home } from "./components/home";
+import { Home } from "./components/home1";
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
