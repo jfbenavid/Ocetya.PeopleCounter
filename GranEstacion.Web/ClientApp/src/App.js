@@ -1,14 +1,23 @@
 import React from "react";
 import { Container } from "reactstrap";
 import { Home } from "./components/home";
+import { createGlobalStyle } from "styled-components";
 
-import "./custom.css";
+const GlobalStyle = createGlobalStyle`
+  body {
+		background-color: #393939;
+		color: #fff;
+  }
+`;
 
 const App = () => {
 	return (
-		<Container>
-			<Home />
-		</Container>
+		<>
+			<GlobalStyle whiteColor />
+			<Container>
+				<Home />
+			</Container>
+		</>
 	);
 };
 

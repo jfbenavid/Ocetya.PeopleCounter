@@ -3,6 +3,10 @@ version: '3.4'
 volumes:
   db_volume:
     name: db_volume
+networks:
+  GE:
+    external:
+      name: nat
 services:
   db:
     image: postgres
@@ -15,6 +19,8 @@ services:
       - db_volume:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - GE
   granestacion.service:
     image: ${DOCKER_REGISTRY-}granestacionservice
     depends_on:
@@ -22,6 +28,8 @@ services:
     build:
       context: .
       dockerfile: GranEstacion.Service\Dockerfile
+    networks:
+      - GE
   granestacion.web:
     image: ${DOCKER_REGISTRY-}granestacionweb
     depends_on:
@@ -32,3 +40,5 @@ services:
     ports:
       - "8080:80"
       - "8000:443"
+    networks:
+      - GE

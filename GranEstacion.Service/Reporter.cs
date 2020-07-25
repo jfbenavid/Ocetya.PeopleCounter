@@ -29,11 +29,11 @@
 
             try
             {
-                string host = _configuration[MailConfiguration.HOST];
-                string user = _configuration[MailConfiguration.USER];
-                string pass = _configuration[MailConfiguration.PASSWORD];
-                string from = _configuration[MailConfiguration.MAIL_FROM];
-                int port = _configuration.GetValue<int>(MailConfiguration.PORT);
+                string host = _configuration[ConfigurationKeys.HOST];
+                string user = _configuration[ConfigurationKeys.USER];
+                string pass = _configuration[ConfigurationKeys.PASSWORD];
+                string from = _configuration[ConfigurationKeys.MAIL_FROM];
+                int port = _configuration.GetValue<int>(ConfigurationKeys.PORT);
 
                 await client.ConnectAsync(host, port, true);
                 await client.AuthenticateAsync(user, pass);

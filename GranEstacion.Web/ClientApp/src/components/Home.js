@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from "react";
+import { Row, Col } from "reactstrap";
+
 import { Counter } from "./counter";
 import { LineChart } from "./line-chart";
-import { Logo } from "./logo";
 import { Header } from "./header";
 import { useInterval, config } from "../util";
 import { SideInfo } from "./side-info";
-import GELogo from "../images/GE.jpeg";
 import { ImgLogo } from "./styles/logo";
-import { Row, Col } from "reactstrap";
+
+import GELogo from "../images/GE.png";
 
 export const Home = () => {
 	const [currentPeople, setCurrentPeople] = useState(10);
@@ -16,7 +17,7 @@ export const Home = () => {
 		data: [[new Date(), currentPeople]],
 	});
 	const maxDataShown = config.MAX_DATA_SHOWN_IN_MINUTES * 60;
-	const refreshIntervalMilliseconds = config.REFRESH_IN_SECONDS * 1000;
+	const refreshIntervalMilliseconds = config.REFRESH_INTERVAL;
 
 	const data = useMemo(
 		() => [

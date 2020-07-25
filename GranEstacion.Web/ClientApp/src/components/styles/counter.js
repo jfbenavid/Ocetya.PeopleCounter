@@ -9,6 +9,7 @@ export const CounterDiv = styled.div`
 	justify-content: center;
 	flex-direction: column;
 	padding: 5px;
+	min-width: 250px;
 `;
 
 export const MaxDiv = styled.div`
