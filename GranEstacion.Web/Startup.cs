@@ -8,6 +8,7 @@ namespace GranEstacion.Web
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Newtonsoft.Json.Serialization;
 
     public class Startup
     {
@@ -23,7 +24,14 @@ namespace GranEstacion.Web
         {
             services
                 .AddControllersWithViews()
-                .AddNewtonsoftJson(options => options.SerializerSettings.DateFormatString = Configuration["AppSettings:DateFormat"]);
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.DateFormatString = Configuration["AppSettings:DateFormat"];
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    };
+                });
 
             services
                 .AddEntityFrameworkNpgsql()

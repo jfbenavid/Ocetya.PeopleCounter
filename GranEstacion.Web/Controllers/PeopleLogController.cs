@@ -11,11 +11,11 @@
 
     [Route("api/[controller]")]
     [ApiController]
-    public class CamerasLogController : ControllerBase
+    public class PeopleLogController : ControllerBase
     {
         private readonly GranEstacionContext _db;
 
-        public CamerasLogController(GranEstacionContext db)
+        public PeopleLogController(GranEstacionContext db)
         {
             _db = db;
             _db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
@@ -29,12 +29,9 @@
 
             var data = await Task.FromResult(
                 _db.Logs
-                .Include(log => log.Camera)
-                .Where(log => log.Date >= referenceDate) //todo: replace referenceDate by DateTime.Now.Date
+                .Where(log => log.Date > referenceDate) //todo: replace referenceDate by DateTime.Now.Date
                 .GroupBy(log => new
                 {
-                    log.Camera.CameraId,
-                    CameraName = log.Camera.Name,
                     log.Date.Year,
                     log.Date.Month,
                     log.Date.Day,
@@ -46,30 +43,21 @@
                 .ThenBy(g => g.Key.Day)
                 .ThenBy(g => g.Key.Hour)
                 .ThenBy(g => g.Key.Minute)
-                .ThenBy(g => g.Key.CameraId)
                 .Select(g => new Log
                 {
-                    CameraId = g.Key.CameraId,
-                    Camera = new Camera { CameraId = g.Key.CameraId, Name = g.Key.CameraName },
-                    Entered = g.Sum(log => log.Entered),
+                    Date = new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0),
                     Exited = g.Sum(log => log.Exited),
-                    Date = new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0)
+                    Entered = g.Sum(log => log.Entered)
                 })
                 .ToArray());
 
-            return data
-                .GroupBy(d => new
-                {
-                    d.CameraId,
-                    d.Camera.Name
-                })
-                .Select(g => new ChartLog
-                {
-                    Label = g.Key.Name,
-                    Data = data
-                        .Where(h => h.CameraId == g.Key.CameraId)
-                        .Select(h => new List<object>() { h.Date, h.Entered - h.Exited })
-                });
+            return new List<ChartLog>()
+            {
+                new ChartLog {
+                    Label = "Personas",
+                    Data = data.Select(log => new List<object>() { log.Date, log.Entered - log.Exited }).ToList()
+                }
+            };
         }
     }
 }

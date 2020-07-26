@@ -8,17 +8,26 @@ import { useInterval, config } from "../util";
 import { SideInfo } from "./side-info";
 import { ImgLogo } from "./styles/logo";
 
-import { getCamerasLog } from "../services/cameras";
+import endpoints from "../util/endpoints";
+import { getLogData } from "../services/log";
+import { getPeopleCount } from "../services/people";
 
 import GELogo from "../images/GE.png";
 
 export const Home = () => {
-	const [currentPeople, setCurrentPeople] = useState(10);
+	const [currentPeople, setCurrentPeople] = useState(0);
+	const [currentEntered, setCurrentEntered] = useState(0);
+	const [currentGone, setCurrentGone] = useState(0);
 	const [cameraChartData, setCameraChartData] = useState([]);
+	const [peopleChartData, setPeopleChartData] = useState([]);
 
 	const fetchData = async () => {
-		const result = await getCamerasLog();
-		setCameraChartData(result);
+		setCameraChartData(await getLogData(endpoints.CAMERAS_LOG));
+		setPeopleChartData(await getLogData(endpoints.PEOPLE_LOG));
+		const { entered, gone, totalPeople } = await getPeopleCount();
+		setCurrentEntered(entered);
+		setCurrentGone(gone);
+		setCurrentPeople(totalPeople);
 	};
 
 	useEffect(() => {
@@ -26,16 +35,16 @@ export const Home = () => {
 	}, []);
 
 	const refreshIntervalMilliseconds = config.REFRESH_INTERVAL;
-	const data = useMemo(() => cameraChartData, [cameraChartData]);
+	const cameraData = useMemo(() => cameraChartData, [cameraChartData]);
+	const peopleData = useMemo(() => peopleChartData, [peopleChartData]);
 
 	useInterval(() => {
-		if (cameraChartData.length > 0) {
-			setCurrentPeople(Math.round(Math.random() * 90));
+		if (cameraChartData.length > 0 || peopleChartData.length > 0) {
 			fetchData();
 		}
 	}, refreshIntervalMilliseconds);
 
-	return cameraChartData.length === 0 ? (
+	return cameraChartData.length === 0 || peopleChartData.length === 0 ? (
 		<div>loading...</div>
 	) : (
 		<>
@@ -45,20 +54,17 @@ export const Home = () => {
 					currentCount={currentPeople}
 					maxPeople={config.MAX_PEOPLE_ALLOWED}
 				/>
-				<SideInfo />
+				<SideInfo entered={currentEntered} gone={currentGone} />
 			</Header>
 			<Row>
 				<Col>
-					<LineChart data={data} />
+					<LineChart data={cameraData} />
 				</Col>
 			</Row>
 			<br />
 			<Row>
 				<Col>
-					<LineChart data={data} />
-				</Col>
-				<Col>
-					<LineChart data={data} />
+					<LineChart data={peopleData} />
 				</Col>
 			</Row>
 		</>
