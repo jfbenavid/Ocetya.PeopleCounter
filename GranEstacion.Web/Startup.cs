@@ -21,12 +21,14 @@ namespace GranEstacion.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services
+                .AddControllersWithViews()
+                .AddNewtonsoftJson(options => options.SerializerSettings.DateFormatString = Configuration["AppSettings:DateFormat"]);
 
             services
                 .AddEntityFrameworkNpgsql()
                 .AddDbContext<GranEstacionContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString(ConnectionStrings.DB)));
+                    options.UseNpgsql(Configuration.GetConnectionString(ConnectionStrings.MIGRATION)));
 
             // In production, the React files will be served from this directory
             services

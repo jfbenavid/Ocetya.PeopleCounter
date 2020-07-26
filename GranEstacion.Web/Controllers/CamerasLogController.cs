@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using GranEstacion.Repository;
+    using GranEstacion.Web.Models;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
@@ -20,8 +21,9 @@
         }
 
         [HttpGet("{minutes}")]
-        public async Task<IEnumerable<Log>> Get(int minutes) =>
-            await Task.FromResult(
+        public async Task<IEnumerable<ChartLog>> Get(int minutes)
+        {
+            var data = await Task.FromResult(
                 _db.Logs
                 .Include(log => log.Camera)
                 .Where(log => log.Date >= DateTime.Now.AddMinutes(-minutes))
@@ -47,11 +49,24 @@
                 .Select(g => new Log
                 {
                     CameraId = g.Key.CameraId,
-                    Camera = new Camera { CameraId= g.Key.CameraId, Name = g.Key.CameraName },
+                    Camera = new Camera { CameraId = g.Key.CameraId, Name = g.Key.CameraName },
                     Entered = g.Sum(log => log.Entered),
                     Exited = g.Sum(log => log.Exited),
                     Date = new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0)
                 })
                 .ToList());
+
+            return data
+                .GroupBy(d => new
+                {
+                    d.CameraId,
+                    d.Camera.Name
+                })
+                .Select(g => new ChartLog
+                {
+                    Label = g.Key.Name,
+                    Data = data.Where(h => h.CameraId == g.Key.CameraId).Select(h => new List<object>() { h.Date, h.Entered - h.Exited }).ToList()
+                });
+        }
     }
 }

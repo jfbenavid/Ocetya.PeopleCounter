@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Row, Col } from "reactstrap";
 
 import { Counter } from "./counter";
@@ -8,44 +8,36 @@ import { useInterval, config } from "../util";
 import { SideInfo } from "./side-info";
 import { ImgLogo } from "./styles/logo";
 
+import { getCamerasLog } from "../services/cameras";
+
 import GELogo from "../images/GE.png";
 
 export const Home = () => {
 	const [currentPeople, setCurrentPeople] = useState(10);
-	const [chartData, setChartData] = useState({
-		label: "Personas",
-		data: [[new Date(), currentPeople]],
-	});
-	const maxDataShown = config.MAX_DATA_SHOWN_IN_MINUTES * 60;
-	const refreshIntervalMilliseconds = config.REFRESH_INTERVAL;
+	const [cameraChartData, setCameraChartData] = useState([]);
 
-	const data = useMemo(
-		() => [
-			{
-				...chartData,
-			},
-		],
-		[chartData]
-	);
+	const fetchData = async () => {
+		const result = await getCamerasLog();
+		setCameraChartData(result);
+	};
+
+	useEffect(() => {
+		fetchData();
+	}, []);
+
+	const refreshIntervalMilliseconds = config.REFRESH_INTERVAL;
+	const data = useMemo(() => cameraChartData, [cameraChartData]);
 
 	useInterval(() => {
-		setCurrentPeople(Math.round(Math.random() * 90));
-		if (chartData.data.length > maxDataShown) {
-			chartData.data.shift();
-			const newData = chartData.data;
-			setChartData({
-				...chartData,
-				data: [...newData, [new Date(), currentPeople]],
-			});
-		} else {
-			setChartData({
-				...chartData,
-				data: [...chartData.data, [new Date(), currentPeople]],
-			});
+		if (cameraChartData.length > 0) {
+			setCurrentPeople(Math.round(Math.random() * 90));
+			fetchData();
 		}
 	}, refreshIntervalMilliseconds);
 
-	return (
+	return cameraChartData.length === 0 ? (
+		<div>loading...</div>
+	) : (
 		<>
 			<Header>
 				<ImgLogo src={GELogo} alt="Gran Estacion" />
