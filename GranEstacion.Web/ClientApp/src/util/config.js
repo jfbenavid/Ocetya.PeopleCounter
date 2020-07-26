@@ -1,5 +1,6 @@
-export const config = {
-	REFRESH_IN_SECONDS: 1,
-	MAX_DATA_SHOWN_IN_MINUTES: 3,
-	MAX_PEOPLE_ALLOWED: 90,
+const minutesForRefreshInterval = 1;
+
+export default {
+	REFRESH_INTERVAL: minutesForRefreshInterval * 60000,
+	MAX_PEOPLE_ALLOWED: 2000,
 };

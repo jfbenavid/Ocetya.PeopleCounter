@@ -1,4 +1,4 @@
-import { useInterval } from './hooks'
-import { config } from './config'
+import { useInterval } from "./hooks";
+import config from "./config";
 
-export { useInterval, config }
+export { useInterval, config };

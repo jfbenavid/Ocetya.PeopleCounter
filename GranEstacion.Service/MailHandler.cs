@@ -1,77 +1,134 @@
 ﻿namespace GranEstacion.Service
 {
-    using GranEstacion.Service.Models;
-    using Microsoft.Extensions.Configuration;
+    using GranEstacion.Repository;
+    using GranEstacion.Service.Config;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using OpenPop.Mime;
-    using OpenPop.Mime.Header;
-    using OpenPop.Pop3;
+    using MimeKit;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public abstract class MailHandler
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IConfiguration _configuration;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public MailHandler(ILogger<Worker> logger, IConfiguration configuration)
+        public MailHandler(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
-            _configuration = configuration;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
-        public Task<MessageModel> GetEmailContentAsync(int messageNumber, ref Pop3Client pop3)
+        protected async Task GetEmailAndSaveDataAsync(MimeMessage message)
         {
-            Message message = pop3.GetMessage(messageNumber);
-            List<MessagePart> attachment = message.FindAllAttachments();
-
-            if (attachment.Count <= 0 || !attachment[0].FileName.EndsWith(".csv"))
+            if (message.Attachments.ToArray().Length <= 0)
             {
-                pop3.DeleteMessage(messageNumber);
-                return Task.FromResult<MessageModel>(null);
+                return;
             }
 
-            MessagePart HTMLTextPart = message.FindFirstHtmlVersion();
-            MessagePart plainTextPart = message.FindFirstPlainTextVersion();
-            MessageHeader header = message.Headers;
-
-            MessageModel result = new MessageModel
+            foreach (var attachment in message.Attachments)
             {
-                MessageID = header.MessageId == null ? "" : header.MessageId.Trim(),
-                FromID = header.From.Address.Trim(),
-                FromName = header.From.DisplayName.Trim(),
-                Subject = header.Subject.Trim(),
-                Body = (plainTextPart == null ? "" : plainTextPart.GetBodyAsText().Trim()),
-                Html = (HTMLTextPart == null ? "" : HTMLTextPart.GetBodyAsText().Trim())
-            };
+                if (attachment is MimePart part)
+                {
+                    var fileName = part.FileName;
+                    if (!fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
+                        continue;
 
-            if (attachment.Count > 0)
-            {
-                result.FileName = attachment[0].FileName.Trim();
-                result.Attachment = attachment;
+                    var bytes = await GetBytesArrayToRead(part);
+
+                    using var stream = new MemoryStream(bytes);
+                    using var reader = new StreamReader(stream);
+                    string line = string.Empty;
+
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        var log = await GetLogAsync(line);
+                        if (log != null)
+                        {
+                            await SaveLogsAsync(log);
+                        }
+                    }
+                }
             }
-
-            return Task.FromResult(result);
         }
 
-        public async Task DownloadFile(MessageModel message)
+        private async Task<IList<Log>> GetLogAsync(string lineData)
         {
-            IList<MessagePart> attachments = message.Attachment;
+            IList<Log> logs = null;
 
             try
             {
-                foreach (var attachment in attachments)
+                var data = lineData.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                if (data.Length > 5 && !data[0].Equals("date", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    byte[] content = attachment.Body;
-                    await File.WriteAllBytesAsync($"{_configuration["EmailConfiguration:DownloadAttachment:Path"]}/{message.FileName}", attachment.Body);
+                    var date =
+                        DateTime.ParseExact(
+                            $"{data[0]} {data[1].Replace(".", string.Empty)}",
+                            "dd/MM/yyyy hh:mm:ss tt",
+                            CultureInfo.InvariantCulture);
+
+                    int camId = 1;
+                    logs = new List<Log>();
+
+                    for (int i = 2; i < 26; i += 2)
+                    {
+                        if (await IsCamIdValid(camId))
+                            logs.Add(await CreateLogAsync(camId, date, int.Parse(data[i]), int.Parse(data[i + 1])));
+
+                        camId++;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, $"Tried to convert a line with error, the line is [{lineData}]");
             }
+
+            return logs;
+        }
+
+        private async Task<Log> CreateLogAsync(int camId, DateTime date, int enter, int exit)
+        {
+            return await Task.FromResult(
+                new Log
+                {
+                    Date = date,
+                    Entered = enter,
+                    Exited = exit,
+                    CameraId = camId
+                });
+        }
+
+        private async Task SaveLogsAsync(IList<Log> logs)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
+
+            await db.Logs.AddRangeAsync(logs);
+            await db.SaveChangesAsync();
+        }
+
+        private async Task<bool> IsCamIdValid(int id)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
+
+            var exists = db.Cameras.Any(cam => cam.CameraId == id);
+
+            return await Task.FromResult(exists);
+        }
+
+        private async Task<byte[]> GetBytesArrayToRead(MimePart attachment)
+        {
+            using var stream = new MemoryStream();
+            await attachment.Content.DecodeToAsync(stream);
+
+            return stream.ToArray();
         }
     }
 }
