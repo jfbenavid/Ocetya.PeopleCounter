@@ -3,10 +3,10 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Windows</DockerTargetOS>
-    <ProjectGuid>322f9ae0-6a96-4e60-bc06-11f9b9ae8b2f</ProjectGuid>
+    <ProjectGuid>dc2e1e72-054c-44f6-8cd8-25a677d39940</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://{ServiceIPAddress}{ServicePort}</DockerServiceUrl>
-    <DockerServiceName>granestacion.web</DockerServiceName>
+    <DockerServiceName>ocetya.peoplecounter.web</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

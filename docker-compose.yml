@@ -10,7 +10,7 @@ networks:
 services:
   db:
     image: postgres
-    container_name: GranEstacion.DB
+    container_name: Ocetya.PeopleCounter.DB
     environment:
       POSTGRES_USER: "geadmin"
       POSTGRES_PASSWORD: "Th1sIs4Pa5sw0rd"
@@ -21,22 +21,22 @@ services:
       - "5432:5432"
     networks:
       - GE
-  granestacion.service:
-    image: ${DOCKER_REGISTRY-}granestacionservice
+  ocetya.peoplecounter.service:
+    image: ${DOCKER_REGISTRY-}ocetyapeoplecounterservice
     depends_on:
       - db
     build:
       context: .
-      dockerfile: GranEstacion.Service\Dockerfile
+      dockerfile: Ocetya.PeopleCounter.Service\Dockerfile
     networks:
       - GE
-  granestacion.web:
-    image: ${DOCKER_REGISTRY-}granestacionweb
+  ocetya.peoplecounter.web:
+    image: ${DOCKER_REGISTRY-}ocetyapeoplecounterweb
     depends_on:
       - db
     build:
       context: .
-      dockerfile: GranEstacion.Web\Dockerfile
+      dockerfile: Ocetya.PeopleCounter.Web\Dockerfile
     ports:
       - "8080:80"
       - "8000:443"

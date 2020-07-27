@@ -10,17 +10,17 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1903 AS build
 WORKDIR /src
-COPY ["GranEstacion.Web/GranEstacion.Web.csproj", "GranEstacion.Web/"]
-COPY ["GranEstacion.Repository/GranEstacion.Repository.csproj", "GranEstacion.Repository/"]
-RUN dotnet restore "GranEstacion.Web/GranEstacion.Web.csproj"
+COPY ["Ocetya.PeopleCounter.Web/Ocetya.PeopleCounter.Web.csproj", "Ocetya.PeopleCounter.Web/"]
+COPY ["Ocetya.PeopleCounter.Repository/Ocetya.PeopleCounter.Repository.csproj", "Ocetya.PeopleCounter.Repository/"]
+RUN dotnet restore "Ocetya.PeopleCounter.Web/Ocetya.PeopleCounter.Web.csproj"
 COPY . .
-WORKDIR "/src/GranEstacion.Web"
-RUN dotnet build "GranEstacion.Web.csproj" -c Release -o /app/build
+WORKDIR "/src/Ocetya.PeopleCounter.Web"
+RUN dotnet build "Ocetya.PeopleCounter.Web.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "GranEstacion.Web.csproj" -c Release -o /app/publish
+RUN dotnet publish "Ocetya.PeopleCounter.Web.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "GranEstacion.Web.dll"]
+ENTRYPOINT ["dotnet", "Ocetya.PeopleCounter.Web.dll"]

@@ -8,17 +8,17 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-1903 AS build
 WORKDIR /src
-COPY ["GranEstacion.Service/GranEstacion.Service.csproj", "GranEstacion.Service/"]
-COPY ["GranEstacion.Repository/GranEstacion.Repository.csproj", "GranEstacion.Repository/"]
-RUN dotnet restore "GranEstacion.Service/GranEstacion.Service.csproj"
+COPY ["Ocetya.PeopleCounter.Service/Ocetya.PeopleCounter.Service.csproj", "Ocetya.PeopleCounter.Service/"]
+COPY ["Ocetya.PeopleCounter.Repository/Ocetya.PeopleCounter.Repository.csproj", "Ocetya.PeopleCounter.Repository/"]
+RUN dotnet restore "Ocetya.PeopleCounter.Service/Ocetya.PeopleCounter.Service.csproj"
 COPY . .
-WORKDIR "/src/GranEstacion.Service"
-RUN dotnet build "GranEstacion.Service.csproj" -c Release -o /app/build
+WORKDIR "/src/Ocetya.PeopleCounter.Service"
+RUN dotnet build "Ocetya.PeopleCounter.Service.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "GranEstacion.Service.csproj" -c Release -o /app/publish
+RUN dotnet publish "Ocetya.PeopleCounter.Service.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "GranEstacion.Service.dll"]
+ENTRYPOINT ["dotnet", "Ocetya.PeopleCounter.Service.dll"]
