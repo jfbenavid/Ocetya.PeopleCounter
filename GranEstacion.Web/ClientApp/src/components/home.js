@@ -7,6 +7,7 @@ import { Header } from "./header";
 import { useInterval, config } from "../util";
 import { SideInfo } from "./side-info";
 import { ImgLogo } from "./styles/logo";
+import { CenteredDiv, Spinner } from "./styles/spinner";
 
 import endpoints from "../util/endpoints";
 import { getLogData } from "../services/log";
@@ -44,9 +45,7 @@ export const Home = () => {
 		}
 	}, refreshIntervalMilliseconds);
 
-	return cameraChartData.length === 0 || peopleChartData.length === 0 ? (
-		<div>loading...</div>
-	) : (
+	return (
 		<>
 			<Header>
 				<ImgLogo src={GELogo} alt="Gran Estacion" />
@@ -58,13 +57,25 @@ export const Home = () => {
 			</Header>
 			<Row>
 				<Col>
-					<LineChart data={cameraData} />
+					{cameraChartData.length > 0 ? (
+						<LineChart data={cameraData} />
+					) : (
+						<CenteredDiv>
+							<Spinner />
+						</CenteredDiv>
+					)}
 				</Col>
 			</Row>
 			<br />
 			<Row>
 				<Col>
-					<LineChart data={peopleData} />
+					{peopleChartData.data && peopleChartData.data.length > 0 ? (
+						<LineChart data={peopleData} />
+					) : (
+						<CenteredDiv>
+							<Spinner />
+						</CenteredDiv>
+					)}
 				</Col>
 			</Row>
 		</>
