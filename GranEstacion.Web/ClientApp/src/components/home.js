@@ -69,7 +69,9 @@ export const Home = () => {
 			<br />
 			<Row>
 				<Col>
-					{peopleChartData.data && peopleChartData.data.length > 0 ? (
+					{peopleChartData.length > 0 &&
+					peopleChartData[0].data &&
+					peopleChartData[0].data.length > 0 ? (
 						<LineChart data={peopleData} />
 					) : (
 						<CenteredDiv>

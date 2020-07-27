@@ -32,17 +32,9 @@
                 {
                     log.Camera.CameraId,
                     CameraName = log.Camera.Name,
-                    log.Date.Year,
-                    log.Date.Month,
-                    log.Date.Day,
-                    log.Date.Hour,
-                    Minute = (log.Date.Minute * 15) / 15
+                    log.Date
                 })
-                .OrderBy(g => g.Key.Year)
-                .ThenBy(g => g.Key.Month)
-                .ThenBy(g => g.Key.Day)
-                .ThenBy(g => g.Key.Hour)
-                .ThenBy(g => g.Key.Minute)
+                .OrderBy(g => g.Key.Date)
                 .ThenBy(g => g.Key.CameraId)
                 .Select(g => new Log
                 {
@@ -50,7 +42,7 @@
                     Camera = new Camera { CameraId = g.Key.CameraId, Name = g.Key.CameraName },
                     Entered = g.Sum(log => log.Entered),
                     Exited = g.Sum(log => log.Exited),
-                    Date = new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0)
+                    Date = g.Key.Date
                 })
                 .ToArrayAsync();
 

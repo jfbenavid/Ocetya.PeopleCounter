@@ -27,22 +27,11 @@
             var data = await
                 _db.Logs
                 .Where(log => log.Date > DateTime.Today)
-                .GroupBy(log => new
-                {
-                    log.Date.Year,
-                    log.Date.Month,
-                    log.Date.Day,
-                    log.Date.Hour,
-                    Minute = (log.Date.Minute * 15) / 15
-                })
-                .OrderBy(g => g.Key.Year)
-                .ThenBy(g => g.Key.Month)
-                .ThenBy(g => g.Key.Day)
-                .ThenBy(g => g.Key.Hour)
-                .ThenBy(g => g.Key.Minute)
+                .GroupBy(log => new { log.Date })
+                .OrderBy(g => g.Key.Date)
                 .Select(g => new Log
                 {
-                    Date = new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0),
+                    Date = g.Key.Date,
                     Exited = g.Sum(log => log.Exited),
                     Entered = g.Sum(log => log.Entered)
                 })
@@ -52,7 +41,9 @@
             {
                 new ChartLog {
                     Label = "Personas",
-                    Data = data.Select(log => new List<object>() { log.Date, log.Entered - log.Exited }).ToList()
+                    Data = data
+                        .Select(log => new List<object>() { log.Date, log.Entered - log.Exited })
+                        .ToList()
                 }
             };
         }
