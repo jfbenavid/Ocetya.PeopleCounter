@@ -25,7 +25,7 @@
             _mailConfiguration = mailConfiguration;
         }
 
-        public async Task GetAttachedFileAsync()
+        public async Task GetAndSaveNewDataAsync()
         {
             ImapClient client = new ImapClient();
 

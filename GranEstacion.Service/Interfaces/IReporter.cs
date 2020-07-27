@@ -5,7 +5,7 @@
 
     public interface IReporter
     {
-        Task GetAttachedFileAsync();
+        Task GetAndSaveNewDataAsync();
 
         Task SendMailAsync(MimeMessage message);
     }

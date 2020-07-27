@@ -8,8 +8,8 @@
     using GranEstacion.Service.Moldels;
     using GranEstacion.Service.Moldels.CSVMaps;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Internal;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using MimeKit;
     using System;
@@ -21,13 +21,11 @@
 
     public class ReportBuilder : IReportBuilder
     {
-        private readonly ILogger<Worker> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IOptions<MailConfiguration> _mailConfiguration;
 
-        public ReportBuilder(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory, IOptions<MailConfiguration> mailConfiguration)
+        public ReportBuilder(IServiceScopeFactory serviceScopeFactory, IOptions<MailConfiguration> mailConfiguration)
         {
-            _logger = logger;
             _serviceScopeFactory = serviceScopeFactory;
             _mailConfiguration = mailConfiguration;
         }
@@ -44,15 +42,15 @@
             return await Task.FromResult(memoryStream.ToArray());
         }
 
-        public async Task<MimeMessage> BuildDailyReportAsync()
+        private async Task<List<DailyReport>> GetDailyReportAsync(DateTime beginDate)
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
-            var data = await db.Logs
+            return await db.Logs
                 .Include(log => log.Camera)
                 .AsNoTracking()
-                .Where(log => log.Date >= DateTime.Today)
+                .Where(log => log.Date >= beginDate && log.Date <= beginDate.AddDays(1))
                 .Select(log => new DailyReport
                 {
                     Date = log.Date,
@@ -61,6 +59,11 @@
                     Exited = log.Exited
                 })
                 .ToListAsync();
+        }
+
+        public async Task<MimeMessage> BuildDailyReportAsync()
+        {
+            var data = await GetDailyReportAsync(DateTime.Today);
 
             var builder = new BodyBuilder
             {
@@ -89,9 +92,49 @@
 
         public async Task<MimeMessage> BuildDayComparisonReport()
         {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
-            throw new NotImplementedException();
+            var todayReport = await GetDailyReportAsync(DateTime.Today);
+            var lastYearReport = await GetDailyReportAsync(DateTime.Today.AddYears(-1));
+
+            var data = todayReport
+                .Join(
+                    lastYearReport,
+                    today => today.Date,
+                    lastYear => lastYear.Date.AddYears(1),
+                    (today, last) => new { today, last })
+                .Select(joined => new ComparisonReport
+                {
+                    Camera = joined.today.Camera,
+                    Date = joined.today.Date,
+                    Entered = joined.today.Entered,
+                    Exited = joined.today.Exited,
+                    LastEntered = joined.last.Entered,
+                    LastExited = joined.last.Exited
+                })
+                .ToList();
+
+            var builder = new BodyBuilder
+            {
+                TextBody = string.Empty
+            };
+
+            builder.Attachments
+                .Add(
+                    $"Comparacion_{DateTime.Today:dd-MM-yyyy}_{DateTime.Today.AddYears(-1):dd-MM-yyyy}.csv",
+                    await BuildCSV<ComparisonReport, ComparisonReportMap>(data));
+
+            var message = new MimeMessage
+            {
+                Body = builder.ToMessageBody(),
+                Sender = new MailboxAddress(_mailConfiguration.Value.User, _mailConfiguration.Value.User),
+                Subject = "Reporte de logs diario",
+            };
+
+            foreach (var adress in _mailConfiguration.Value.AdressesToSend)
+            {
+                message.To.Add(new MailboxAddress(adress, adress));
+            }
+
+            return message;
         }
     }
 }

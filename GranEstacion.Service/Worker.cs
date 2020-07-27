@@ -32,8 +32,13 @@ namespace GranEstacion.Service
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                await _reporter.SendMailAsync(await _reportBuilder.BuildDailyReportAsync());
-                await _reporter.GetAttachedFileAsync();
+                await _reporter.GetAndSaveNewDataAsync();
+
+                if (DateTime.Now.Hour == 23 && DateTime.Now.Minute == 30)
+                {
+                    await _reporter.SendMailAsync(await _reportBuilder.BuildDailyReportAsync());
+                    await _reporter.SendMailAsync(await _reportBuilder.BuildDayComparisonReport());
+                }
 
                 await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
             }
