@@ -1,13 +1,13 @@
 namespace Ocetya.PeopleCounter.Service
 {
-    using Ocetya.PeopleCounter.Service.Config;
-    using Ocetya.PeopleCounter.Service.Interfaces;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
+    using Ocetya.PeopleCounter.Service.Config;
+    using Ocetya.PeopleCounter.Service.Interfaces;
 
     public class Worker : BackgroundService
     {

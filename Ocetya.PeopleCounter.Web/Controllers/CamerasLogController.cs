@@ -4,10 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Ocetya.PeopleCounter.Repository;
-    using Ocetya.PeopleCounter.Web.Models;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Ocetya.PeopleCounter.Repository;
+    using Ocetya.PeopleCounter.Web.Models;
 
     [Route("api/[controller]")]
     [ApiController]

@@ -1,9 +1,6 @@
 ﻿namespace Ocetya.PeopleCounter.Service.Moldels.CSVMaps
 {
     using CsvHelper.Configuration;
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     public class DailyReportMap : ClassMap<DailyReport>
     {

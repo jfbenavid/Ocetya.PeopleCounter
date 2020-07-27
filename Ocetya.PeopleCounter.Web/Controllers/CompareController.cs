@@ -1,11 +1,7 @@
 ﻿namespace Ocetya.PeopleCounter.Web.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Ocetya.PeopleCounter.Repository;
     using Microsoft.AspNetCore.Mvc;
+    using Ocetya.PeopleCounter.Repository;
 
     [Route("api/[controller]")]
     [ApiController]

@@ -1,6 +1,5 @@
 ﻿namespace Ocetya.PeopleCounter.Web.Models
 {
-    using System;
     using System.Collections.Generic;
 
     public class ChartLog

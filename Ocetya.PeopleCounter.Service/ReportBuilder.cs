@@ -1,23 +1,23 @@
 ﻿namespace Ocetya.PeopleCounter.Service
 {
-    using CsvHelper;
-    using CsvHelper.Configuration;
-    using Ocetya.PeopleCounter.Repository;
-    using Ocetya.PeopleCounter.Service.Config;
-    using Ocetya.PeopleCounter.Service.Interfaces;
-    using Ocetya.PeopleCounter.Service.Moldels;
-    using Ocetya.PeopleCounter.Service.Moldels.CSVMaps;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Internal;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
-    using MimeKit;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using CsvHelper;
+    using CsvHelper.Configuration;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Internal;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
+    using MimeKit;
+    using Ocetya.PeopleCounter.Repository;
+    using Ocetya.PeopleCounter.Service.Config;
+    using Ocetya.PeopleCounter.Service.Interfaces;
+    using Ocetya.PeopleCounter.Service.Moldels;
+    using Ocetya.PeopleCounter.Service.Moldels.CSVMaps;
 
     public class ReportBuilder : IReportBuilder
     {

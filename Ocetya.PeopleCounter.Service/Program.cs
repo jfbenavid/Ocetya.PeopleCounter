@@ -1,16 +1,15 @@
 namespace Ocetya.PeopleCounter.Service
 {
-    using Ocetya.PeopleCounter.Repository;
-    using Ocetya.PeopleCounter.Service.Config;
-    using Ocetya.PeopleCounter.Service.Interfaces;
+    using System;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.EventLog;
-    using System.IO;
-    using System;
+    using Ocetya.PeopleCounter.Repository;
+    using Ocetya.PeopleCounter.Service.Config;
+    using Ocetya.PeopleCounter.Service.Interfaces;
 
     public class Program
     {

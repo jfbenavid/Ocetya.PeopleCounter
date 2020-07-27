@@ -1,7 +1,7 @@
 ﻿namespace Ocetya.PeopleCounter.Service.Interfaces
 {
-    using MimeKit;
     using System.Threading.Tasks;
+    using MimeKit;
 
     public interface IReporter
     {

@@ -1,6 +1,5 @@
 namespace Ocetya.PeopleCounter.Web
 {
-    using Ocetya.PeopleCounter.Repository;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -9,6 +8,7 @@ namespace Ocetya.PeopleCounter.Web
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Newtonsoft.Json.Serialization;
+    using Ocetya.PeopleCounter.Repository;
 
     public class Startup
     {

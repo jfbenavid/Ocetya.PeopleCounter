@@ -1,7 +1,7 @@
 ﻿namespace Ocetya.PeopleCounter.Service
 {
-    using Ocetya.PeopleCounter.Service.Config;
-    using Ocetya.PeopleCounter.Service.Interfaces;
+    using System;
+    using System.Threading.Tasks;
     using MailKit;
     using MailKit.Net.Imap;
     using MailKit.Net.Smtp;
@@ -10,8 +10,8 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using MimeKit;
-    using System;
-    using System.Threading.Tasks;
+    using Ocetya.PeopleCounter.Service.Config;
+    using Ocetya.PeopleCounter.Service.Interfaces;
 
     public class Reporter : MailHandler, IReporter
     {

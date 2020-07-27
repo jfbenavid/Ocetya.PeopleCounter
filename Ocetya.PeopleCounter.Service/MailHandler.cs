@@ -1,16 +1,16 @@
 ﻿namespace Ocetya.PeopleCounter.Service
 {
-    using Ocetya.PeopleCounter.Repository;
-    using Ocetya.PeopleCounter.Service.Config;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
-    using MimeKit;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using MimeKit;
+    using Ocetya.PeopleCounter.Repository;
+    using Ocetya.PeopleCounter.Service.Config;
 
     public abstract class MailHandler
     {
