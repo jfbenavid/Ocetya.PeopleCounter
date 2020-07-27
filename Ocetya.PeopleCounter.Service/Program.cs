@@ -10,13 +10,14 @@ namespace Ocetya.PeopleCounter.Service
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.EventLog;
     using System.IO;
+    using System;
 
     public class Program
     {
         public static IConfiguration LoadConfiguration()
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             return builder.Build();
