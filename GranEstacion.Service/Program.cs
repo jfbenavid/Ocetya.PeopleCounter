@@ -1,6 +1,7 @@
 namespace GranEstacion.Service
 {
     using GranEstacion.Repository;
+    using GranEstacion.Service.Config;
     using GranEstacion.Service.Interfaces;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -35,8 +36,10 @@ namespace GranEstacion.Service
                     var _configuration = LoadConfiguration();
 
                     var optionsBuilder = new DbContextOptionsBuilder<GranEstacionContext>();
-                    optionsBuilder.UseNpgsql(_configuration.GetConnectionString(ConnectionStrings.DB));
+                    optionsBuilder.UseNpgsql(_configuration.GetConnectionString(ConnectionStrings.MIGRATION));
                     services.AddScoped(s => new GranEstacionContext(optionsBuilder.Options));
+
+                    services.Configure<MailConfiguration>(_configuration.GetSection(ConfigurationKeys.MAIL_CONFIGURATION));
 
                     services
                         .AddHostedService<Worker>()
@@ -48,7 +51,8 @@ namespace GranEstacion.Service
 
                     //Dependency Injection
                     services
-                        .AddTransient<IReporter, Reporter>();
+                        .AddTransient<IReporter, Reporter>()
+                        .AddTransient<IReportBuilder, ReportBuilder>();
                 }).UseWindowsService();
     }
 }

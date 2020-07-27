@@ -1,12 +1,10 @@
 ﻿namespace GranEstacion.Web.Controllers
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GranEstacion.Repository;
     using GranEstacion.Web.Models;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
@@ -25,12 +23,9 @@
         [HttpGet]
         public async Task<CountLog> Get()
         {
-            var now = DateTime.Now;
-            var referenceDate = new DateTime(now.Year, now.Month, 21);
-
-            return await Task.FromResult(
+            return await
                 _db.Logs
-                .Where(log => log.Date > referenceDate) //todo: replace referenceDate by DateTime.Now.Date
+                .Where(log => log.Date > DateTime.Today)
                 .GroupBy(log => 1)
                 .Select(g => new CountLog
                 {
@@ -38,7 +33,7 @@
                     Gone = g.Sum(log => log.Exited),
                     Entered = g.Sum(log => log.Entered)
                 })
-                .FirstOrDefault());
+                .FirstOrDefaultAsync();
         }
     }
 }

@@ -24,12 +24,9 @@
         [HttpGet]
         public async Task<IEnumerable<ChartLog>> Get()
         {
-            var now = DateTime.Now;
-            var referenceDate = new DateTime(now.Year, now.Month, 21);
-
-            var data = await Task.FromResult(
+            var data = await
                 _db.Logs
-                .Where(log => log.Date > referenceDate) //todo: replace referenceDate by DateTime.Now.Date
+                .Where(log => log.Date > DateTime.Today)
                 .GroupBy(log => new
                 {
                     log.Date.Year,
@@ -49,7 +46,7 @@
                     Exited = g.Sum(log => log.Exited),
                     Entered = g.Sum(log => log.Entered)
                 })
-                .ToArray());
+                .ToArrayAsync();
 
             return new List<ChartLog>()
             {

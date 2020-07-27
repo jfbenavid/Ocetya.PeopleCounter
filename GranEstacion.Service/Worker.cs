@@ -14,12 +14,14 @@ namespace GranEstacion.Service
         private readonly ILogger<Worker> _logger;
         private readonly IReporter _reporter;
         private readonly IConfiguration _configuration;
+        private readonly IReportBuilder _reportBuilder;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration, IReporter reporter)
+        public Worker(ILogger<Worker> logger, IConfiguration configuration, IReporter reporter, IReportBuilder reportBuilder)
         {
             _logger = logger;
             _configuration = configuration;
             _reporter = reporter;
+            _reportBuilder = reportBuilder;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,6 +32,7 @@ namespace GranEstacion.Service
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
+                await _reporter.SendMailAsync(await _reportBuilder.BuildDailyReportAsync());
                 await _reporter.GetAttachedFileAsync();
 
                 await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);

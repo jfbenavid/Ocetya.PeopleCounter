@@ -24,13 +24,10 @@
         [HttpGet]
         public async Task<IEnumerable<ChartLog>> Get()
         {
-            var now = DateTime.Now;
-            var referenceDate = new DateTime(now.Year, now.Month, 21);
-
-            var data = await Task.FromResult(
+            var data = await
                 _db.Logs
                 .Include(log => log.Camera)
-                .Where(log => log.Date >= referenceDate) //todo: replace referenceDate by DateTime.Now.Date
+                .Where(log => log.Date >= DateTime.Today)
                 .GroupBy(log => new
                 {
                     log.Camera.CameraId,
@@ -55,7 +52,7 @@
                     Exited = g.Sum(log => log.Exited),
                     Date = new DateTime(g.Key.Year, g.Key.Month, g.Key.Day, g.Key.Hour, g.Key.Minute, 0)
                 })
-                .ToArray());
+                .ToArrayAsync();
 
             return data
                 .GroupBy(d => new
