@@ -78,7 +78,7 @@
             var message = new MimeMessage
             {
                 Body = builder.ToMessageBody(),
-                Sender = new MailboxAddress(_mailConfiguration.Value.User, _mailConfiguration.Value.User),
+                Sender = new MailboxAddress(_mailConfiguration.Value.SmtpUser, _mailConfiguration.Value.SmtpUser),
                 Subject = "Reporte de logs diario",
             };
 
@@ -125,7 +125,7 @@
             var message = new MimeMessage
             {
                 Body = builder.ToMessageBody(),
-                Sender = new MailboxAddress(_mailConfiguration.Value.User, _mailConfiguration.Value.User),
+                Sender = new MailboxAddress(_mailConfiguration.Value.SmtpUser, _mailConfiguration.Value.SmtpUser),
                 Subject = "Reporte de logs diario",
             };
 

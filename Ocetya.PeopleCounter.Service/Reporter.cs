@@ -1,6 +1,8 @@
 ﻿namespace Ocetya.PeopleCounter.Service
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
     using System.Threading.Tasks;
     using MailKit;
     using MailKit.Net.Imap;
@@ -32,7 +34,7 @@
             try
             {
                 await client.ConnectAsync(_mailConfiguration.Value.ImapHost, _mailConfiguration.Value.ImapPort, true);
-                await client.AuthenticateAsync(_mailConfiguration.Value.User, _mailConfiguration.Value.Password);
+                await client.AuthenticateAsync(_mailConfiguration.Value.ImapUser, _mailConfiguration.Value.ImapPassword);
 
                 var inbox = client.Inbox;
                 await inbox.OpenAsync(FolderAccess.ReadWrite);
@@ -41,13 +43,14 @@
                     .FromContains(_mailConfiguration.Value.EmailsFrom)
                     .And(SearchQuery.NotSeen));
 
-                foreach (var uid in uids)
+                var messages = await inbox.FetchAsync(uids, MessageSummaryItems.UniqueId | MessageSummaryItems.BodyStructure | MessageSummaryItems.Envelope);
+
+                foreach (var msg in messages)
                 {
-                    var message = await inbox.GetMessageAsync(uid);
+                    await GetEmailAndSaveDataAsync(msg.Attachments, inbox, msg.UniqueId);
+                    await GetEmailAndSaveDataAsync(msg.BodyParts, inbox, msg.UniqueId);
 
-                    await GetEmailAndSaveDataAsync(message);
-
-                    inbox.AddFlags(uid, MessageFlags.Seen, true);
+                    inbox.AddFlags(msg.UniqueId, MessageFlags.Seen, true);
                 }
             }
             catch (Exception ex)
@@ -73,7 +76,7 @@
                     smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
                     await smtp.ConnectAsync(_mailConfiguration.Value.SmtpHost, _mailConfiguration.Value.SmtpPort, true);
-                    await smtp.AuthenticateAsync(_mailConfiguration.Value.User, _mailConfiguration.Value.Password);
+                    await smtp.AuthenticateAsync(_mailConfiguration.Value.SmtpUser, _mailConfiguration.Value.SmtpPassword);
                     await smtp.SendAsync(message);
                     await smtp.DisconnectAsync(true);
                 }

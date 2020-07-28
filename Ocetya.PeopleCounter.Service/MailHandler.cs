@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using MailKit;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using MimeKit;
@@ -23,36 +24,34 @@
             _serviceScopeFactory = serviceScopeFactory;
         }
 
-        protected async Task GetEmailAndSaveDataAsync(MimeMessage message)
+        private async Task ReadStreamAsync(byte[] bytes)
         {
-            if (message.Attachments.ToArray().Length <= 0)
-            {
-                return;
-            }
+            using var stream = new MemoryStream(bytes);
+            using var reader = new StreamReader(stream);
+            string line = string.Empty;
 
-            foreach (var attachment in message.Attachments)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                if (attachment is MimePart part)
+                var log = await GetLogAsync(line);
+                if (log != null)
                 {
-                    var fileName = part.FileName;
-                    if (!fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
-                        continue;
-
-                    var bytes = await GetBytesArrayToRead(part);
-
-                    using var stream = new MemoryStream(bytes);
-                    using var reader = new StreamReader(stream);
-                    string line = string.Empty;
-
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        var log = await GetLogAsync(line);
-                        if (log != null)
-                        {
-                            await SaveLogsAsync(log);
-                        }
-                    }
+                    await SaveLogsAsync(log);
                 }
+            }
+        }
+
+        protected async Task GetEmailAndSaveDataAsync(IEnumerable<BodyPartBasic> attachments, IMailFolder folder, UniqueId uid)
+        {
+            foreach (var attachment in attachments)
+            {
+                MimeEntity part = folder.GetBodyPart(uid, attachment);
+                var fileName = part.ContentDisposition?.FileName ?? attachment.ContentType.Name;
+                if (string.IsNullOrEmpty(fileName) || !fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
+                var bytes = await GetBytesArrayToRead((MimePart)part);
+
+                await ReadStreamAsync(bytes);
             }
         }
 

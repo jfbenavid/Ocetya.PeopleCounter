@@ -10,9 +10,13 @@
 
         public string EmailsFrom { get; set; }
 
-        public string User { get; set; }
+        public string SmtpUser { get; set; }
 
-        public string Password { get; set; }
+        public string SmtpPassword { get; set; }
+
+        public string ImapUser { get; set; }
+
+        public string ImapPassword { get; set; }
 
         public string SmtpHost { get; set; }
 
