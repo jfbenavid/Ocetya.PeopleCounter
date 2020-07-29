@@ -1,7 +1,6 @@
 ﻿namespace Ocetya.PeopleCounter.Service
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
     using MailKit;
@@ -47,10 +46,9 @@
 
                 foreach (var msg in messages)
                 {
-                    await GetEmailAndSaveDataAsync(msg.Attachments, inbox, msg.UniqueId);
                     await GetEmailAndSaveDataAsync(msg.BodyParts, inbox, msg.UniqueId);
 
-                    inbox.AddFlags(msg.UniqueId, MessageFlags.Seen, true);
+                    await inbox.AddFlagsAsync(msg.UniqueId, MessageFlags.Seen, true);
                 }
             }
             catch (Exception ex)
@@ -87,6 +85,20 @@
             {
                 _logger.LogError(ex, ex.Message);
             }
+        }
+
+        public async Task UploadReportFromDirectoryAsync(string path)
+        {
+            string[] fileEntries = Directory.GetFiles(path);
+
+            foreach (var fileName in fileEntries)
+            {
+                await ReadStreamAsync(File.ReadAllBytes(fileName));
+
+                File.Delete(fileName);
+            }
+
+            Directory.Delete(path);
         }
     }
 }

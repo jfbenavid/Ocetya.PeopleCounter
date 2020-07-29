@@ -1,6 +1,7 @@
 namespace Ocetya.PeopleCounter.Service
 {
     using System;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
@@ -27,6 +28,7 @@ namespace Ocetya.PeopleCounter.Service
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             int delay = _configuration.GetValue<int>(ConfigurationKeys.WORKER_SECONDS_DELAY);
+            string uploaderPath = _configuration[ConfigurationKeys.UPLOAD_REPORT_PATH];
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -38,6 +40,11 @@ namespace Ocetya.PeopleCounter.Service
                 {
                     await _reporter.SendMailAsync(await _reportBuilder.BuildDailyReportAsync());
                     await _reporter.SendMailAsync(await _reportBuilder.BuildDayComparisonReport());
+                }
+
+                if (Directory.Exists(uploaderPath))
+                {
+                    await _reporter.UploadReportFromDirectoryAsync(uploaderPath);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);

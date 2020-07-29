@@ -8,5 +8,7 @@
         Task GetAndSaveNewDataAsync();
 
         Task SendMailAsync(MimeMessage message);
+
+        Task UploadReportFromDirectoryAsync(string path);
     }
 }

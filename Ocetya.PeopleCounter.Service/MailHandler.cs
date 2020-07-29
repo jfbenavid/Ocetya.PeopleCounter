@@ -24,13 +24,16 @@
             _serviceScopeFactory = serviceScopeFactory;
         }
 
-        private async Task ReadStreamAsync(byte[] bytes)
+        protected async Task ReadStreamAsync(byte[] bytes)
         {
             using var stream = new MemoryStream(bytes);
             using var reader = new StreamReader(stream);
-            string line = string.Empty;
 
-            while ((line = await reader.ReadLineAsync()) != null)
+            string[] lines = reader
+                .ReadToEnd()
+                .Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
             {
                 var log = await GetLogAsync(line);
                 if (log != null)
@@ -46,7 +49,9 @@
             {
                 MimeEntity part = folder.GetBodyPart(uid, attachment);
                 var fileName = part.ContentDisposition?.FileName ?? attachment.ContentType.Name;
-                if (string.IsNullOrEmpty(fileName) || !fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
+                var isCsv = !fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase);
+
+                if (string.IsNullOrEmpty(fileName) || isCsv)
                     continue;
 
                 var bytes = await GetBytesArrayToRead((MimePart)part);
