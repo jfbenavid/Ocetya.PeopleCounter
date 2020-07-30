@@ -49,9 +49,9 @@
             {
                 MimeEntity part = folder.GetBodyPart(uid, attachment);
                 var fileName = part.ContentDisposition?.FileName ?? attachment.ContentType.Name;
-                var isCsv = !fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase);
 
-                if (string.IsNullOrEmpty(fileName) || isCsv)
+                if (string.IsNullOrEmpty(fileName) ||
+                    !fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
                     continue;
 
                 var bytes = await GetBytesArrayToRead((MimePart)part);
