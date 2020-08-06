@@ -40,7 +40,8 @@
                 var uids = await inbox.SearchAsync(
                     SearchQuery
                     .FromContains(_mailConfiguration.Value.EmailsFrom)
-                    .And(SearchQuery.NotSeen));
+                    .And(SearchQuery.NotSeen)
+                    .And(SearchQuery.SubjectContains(_mailConfiguration.Value.EmailSubject)));
 
                 var messages = await inbox.FetchAsync(uids, MessageSummaryItems.UniqueId | MessageSummaryItems.BodyStructure | MessageSummaryItems.Envelope);
 

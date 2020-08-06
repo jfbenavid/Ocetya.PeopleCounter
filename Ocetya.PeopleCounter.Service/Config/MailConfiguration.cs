@@ -10,6 +10,8 @@
 
         public string EmailsFrom { get; set; }
 
+        public string EmailSubject { get; set; }
+
         public string SmtpUser { get; set; }
 
         public string SmtpPassword { get; set; }
