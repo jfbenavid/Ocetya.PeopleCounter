@@ -33,13 +33,13 @@ namespace Ocetya.PeopleCounter.Service
                     options.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information))
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var _configuration = LoadConfiguration();
+                    var configuration = LoadConfiguration();
 
                     var optionsBuilder = new DbContextOptionsBuilder<GranEstacionContext>();
-                    optionsBuilder.UseNpgsql(_configuration.GetConnectionString(ConnectionStrings.MIGRATION));
+                    optionsBuilder.UseNpgsql(configuration.GetConnectionString(ConnectionStrings.MIGRATION));
                     services.AddScoped(s => new GranEstacionContext(optionsBuilder.Options));
 
-                    services.Configure<MailConfiguration>(_configuration.GetSection(ConfigurationKeys.MAIL_CONFIGURATION));
+                    services.Configure<MailConfiguration>(configuration.GetSection(ConfigurationKeys.MAIL_CONFIGURATION));
 
                     services
                         .AddHostedService<Worker>()

@@ -98,8 +98,6 @@
 
                 File.Delete(fileName);
             }
-
-            Directory.Delete(path);
         }
     }
 }

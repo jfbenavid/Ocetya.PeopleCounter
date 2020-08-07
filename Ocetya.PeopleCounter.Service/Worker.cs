@@ -2,6 +2,7 @@ namespace Ocetya.PeopleCounter.Service
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
@@ -12,39 +13,39 @@ namespace Ocetya.PeopleCounter.Service
 
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IReporter _reporter;
-        private readonly IConfiguration _configuration;
-        private readonly IReportBuilder _reportBuilder;
+        private readonly ILogger<Worker> logger;
+        private readonly IReporter reporter;
+        private readonly IConfiguration configuration;
+        private readonly IReportBuilder reportBuilder;
 
         public Worker(ILogger<Worker> logger, IConfiguration configuration, IReporter reporter, IReportBuilder reportBuilder)
         {
-            _logger = logger;
-            _configuration = configuration;
-            _reporter = reporter;
-            _reportBuilder = reportBuilder;
+            this.logger = logger;
+            this.configuration = configuration;
+            this.reporter = reporter;
+            this.reportBuilder = reportBuilder;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            int delay = _configuration.GetValue<int>(ConfigurationKeys.WORKER_SECONDS_DELAY);
-            string uploaderPath = _configuration[ConfigurationKeys.UPLOAD_REPORT_PATH];
+            int delay = configuration.GetValue<int>(ConfigurationKeys.WORKER_SECONDS_DELAY);
+            string uploaderPath = configuration[ConfigurationKeys.UPLOAD_REPORT_PATH];
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                await _reporter.GetAndSaveNewDataAsync();
+                await reporter.GetAndSaveNewDataAsync();
 
                 if (DateTime.Now.Hour == 23 && DateTime.Now.Minute == 30)
                 {
-                    await _reporter.SendMailAsync(await _reportBuilder.BuildDailyReportAsync());
-                    await _reporter.SendMailAsync(await _reportBuilder.BuildDayComparisonReport());
+                    await reporter.SendMailAsync(await reportBuilder.BuildDailyReportAsync());
+                    await reporter.SendMailAsync(await reportBuilder.BuildDayComparisonReport());
                 }
 
-                if (Directory.Exists(uploaderPath))
+                if (Directory.Exists(uploaderPath) && Directory.EnumerateFileSystemEntries(uploaderPath).Any())
                 {
-                    await _reporter.UploadReportFromDirectoryAsync(uploaderPath);
+                    await reporter.UploadReportFromDirectoryAsync(uploaderPath);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
