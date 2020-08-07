@@ -11,33 +11,26 @@ namespace Ocetya.PeopleCounter.ReportGenerator
 
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IConfiguration _configuration;
-        private readonly IWin32 _env;
+        private readonly ILogger<Worker> logger;
+        private readonly IConfiguration configuration;
+        private readonly IRunner runner;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration, IWin32 env)
+        public Worker(ILogger<Worker> logger, IConfiguration configuration, IRunner runner)
         {
-            _logger = logger;
-            _configuration = configuration;
-            _env = env;
+            this.logger = logger;
+            this.configuration = configuration;
+            this.runner = runner;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                //SetCursorPos(0, 0);
-                await _env.PressDownArrow();
-                await _env.PressDownArrow();
-                await _env.PressDownArrow();
-                await _env.PressDownArrow();
-                await _env.PressDownArrow();
-                await _env.PressDownArrow();
-                await _env.PressDownArrow();
+                await runner.RunFlow();
 
-                await Task.Delay(TimeSpan.FromSeconds(_configuration.GetValue<int>(ConfigurationKeys.WORKER_DELAY)), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(configuration.GetValue<int>(ConfigurationKeys.WORKER_DELAY)), stoppingToken);
             }
         }
     }

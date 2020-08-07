@@ -1,7 +1,7 @@
 ﻿namespace Ocetya.PeopleCounter.ReportGenerator
 {
     using System.Runtime.InteropServices;
-    using System.Threading.Tasks;
+    using System.Threading;
     using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
     using WindowsInput;
     using WindowsInput.Native;
@@ -10,62 +10,71 @@
     {
         private const int MOUSEEVENTF_LEFTDOWN = 0x02;
         private const int MOUSEEVENTF_LEFTUP = 0x04;
-        private readonly IInputSimulator _sim;
+        private readonly IInputSimulator sim;
 
         public Win32(IInputSimulator sim)
         {
-            _sim = sim;
+            this.sim = sim;
         }
 
         [DllImport("user32.dll")]
         private static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
 
-        private async Task PressKey(VirtualKeyCode key)
+        private void PressKey(VirtualKeyCode key, int times)
         {
-            await Task.Run(() =>
+            for (int i = 0; i < times; i++)
             {
-                _sim.Keyboard
-                    .KeyPress(key);
-            });
+                sim.Keyboard.KeyPress(key);
+                Thread.Sleep(50);
+            }
         }
 
-        public async Task MouseClick(int x, int y)
+        public Win32 MouseClick()
         {
-            await Task.Run(() =>
-            {
-                mouse_event(MOUSEEVENTF_LEFTDOWN, x, y, 0, 0);
-                mouse_event(MOUSEEVENTF_LEFTUP, x, y, 0, 0);
-            });
+            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+            return this;
         }
 
-        public async Task PressDownArrow()
+        public Win32 PressDownArrow(int times = 1)
         {
-            await PressKey(VirtualKeyCode.DOWN);
+            PressKey(VirtualKeyCode.DOWN, times);
+            return this;
         }
 
-        public async Task PressUpArrow()
+        public Win32 PressTab(int times = 1)
         {
-            await PressKey(VirtualKeyCode.UP);
+            PressKey(VirtualKeyCode.TAB, times);
+            return this;
         }
 
-        public async Task PressLeftArrow()
+        public Win32 PressUpArrow(int times = 1)
         {
-            await PressKey(VirtualKeyCode.LEFT);
+            PressKey(VirtualKeyCode.UP, times);
+            return this;
         }
 
-        public async Task PressRightArrow()
+        public Win32 PressLeftArrow(int times = 1)
         {
-            await PressKey(VirtualKeyCode.RIGHT);
+            PressKey(VirtualKeyCode.LEFT, times);
+            return this;
         }
 
-        public async Task InsertText(string text)
+        public Win32 PressRightArrow(int times = 1)
         {
-            await Task.Run(() =>
-            {
-                var sim = new InputSimulator();
-                sim.Keyboard
-                    .TextEntry(text);
-            });
+            PressKey(VirtualKeyCode.RIGHT, times);
+            return this;
+        }
+
+        public Win32 InsertText(string text)
+        {
+            sim.Keyboard.TextEntry(text);
+            return this;
+        }
+
+        public Win32 PressEnter(int times = 1)
+        {
+            PressKey(VirtualKeyCode.RETURN, times);
+            return this;
         }
     }
 }

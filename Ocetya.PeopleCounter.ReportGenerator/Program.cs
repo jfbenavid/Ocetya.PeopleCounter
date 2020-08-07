@@ -6,7 +6,9 @@ namespace Ocetya.PeopleCounter.ReportGenerator
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.EventLog;
+    using Ocetya.PeopleCounter.ReportGenerator.Config;
     using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
+    using Ocetya.PeopleCounter.ReportGenerator.Models;
     using Ocetya.PeopleCounter.ReportGenerator.StepPattern;
     using WindowsInput;
 
@@ -41,6 +43,8 @@ namespace Ocetya.PeopleCounter.ReportGenerator
                             config.LogName = "People Counter Service";
                             config.SourceName = "People Counter";
                         });
+
+                    services.Configure<Point>(_configuration.GetSection(ConfigurationKeys.MOUSE_STARTING_POINT));
 
                     services
                         .AddTransient<IInputSimulator, InputSimulator>()

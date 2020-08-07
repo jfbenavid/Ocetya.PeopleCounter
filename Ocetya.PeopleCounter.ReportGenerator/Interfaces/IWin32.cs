@@ -1,19 +1,21 @@
 ﻿namespace Ocetya.PeopleCounter.ReportGenerator.Interfaces
 {
-    using System.Threading.Tasks;
-
     public interface IWin32
     {
-        Task MouseClick(int x, int y);
+        Win32 MouseClick();
 
-        Task PressUpArrow();
+        Win32 PressUpArrow(int times = 1);
 
-        Task PressDownArrow();
+        Win32 PressDownArrow(int times = 1);
 
-        Task PressLeftArrow();
+        Win32 PressLeftArrow(int times = 1);
 
-        Task PressRightArrow();
+        Win32 PressRightArrow(int times = 1);
 
-        Task InsertText(string text);
+        Win32 PressTab(int times = 1);
+
+        Win32 PressEnter(int times = 1);
+
+        Win32 InsertText(string text);
     }
 }

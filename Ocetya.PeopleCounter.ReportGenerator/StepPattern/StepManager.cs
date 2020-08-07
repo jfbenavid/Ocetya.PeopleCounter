@@ -13,6 +13,7 @@
         public StepManager(ILogger<Worker> logger)
         {
             _logger = logger;
+            _steps = new Queue<IStep>();
         }
 
         public async Task<StepManager> AddStep(IStep step)

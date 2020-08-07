@@ -1,30 +1,29 @@
 ﻿namespace Ocetya.PeopleCounter.ReportGenerator
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
-    using Ocetya.PeopleCounter.ReportGenerator.StepPattern;
+    using Ocetya.PeopleCounter.ReportGenerator.Models;
 
     public class Runner : IRunner
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IStepManager _step;
-        private readonly IWin32 _env;
+        private readonly IStepManager step;
+        private readonly IWin32 env;
+        private readonly IOptions<Point> options;
 
-        public Runner(ILogger<Worker> logger, IStepManager step, IWin32 env)
+        public Runner(IStepManager step, IWin32 env, IOptions<Point> options)
         {
-            _logger = logger;
-            _step = step;
-            _env = env;
+            this.step = step;
+            this.env = env;
+            this.options = options;
         }
 
         public async Task RunFlow()
         {
-            var x = await _step
-                .AddStep(new SetDateStep(_env));
+            var x = await step
+                .AddStep(new SetDateStep(env, options)).Result
+                .AddStep(new CreateReportStep(env));
 
             await x.Execute();
         }
