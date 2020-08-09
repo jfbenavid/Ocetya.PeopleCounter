@@ -1,7 +1,6 @@
 ﻿namespace Ocetya.PeopleCounter.ReportGenerator
 {
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
     using Ocetya.PeopleCounter.ReportGenerator.Models;

@@ -25,7 +25,7 @@
             for (int i = 0; i < times; i++)
             {
                 sim.Keyboard.KeyPress(key);
-                Thread.Sleep(50);
+                Thread.Sleep(100);
             }
         }
 

@@ -14,11 +14,6 @@ namespace Ocetya.PeopleCounter.ReportGenerator
 
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
-
         public static IConfiguration LoadConfiguration()
         {
             var builder = new ConfigurationBuilder()
@@ -26,6 +21,11 @@ namespace Ocetya.PeopleCounter.ReportGenerator
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             return builder.Build();
+        }
+
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -40,8 +40,8 @@ namespace Ocetya.PeopleCounter.ReportGenerator
                         .AddHostedService<Worker>()
                         .Configure<EventLogSettings>(config =>
                         {
-                            config.LogName = "People Counter Service";
-                            config.SourceName = "People Counter";
+                            config.LogName = "Report Generator Service";
+                            config.SourceName = "Report Generator";
                         });
 
                     services.Configure<Point>(_configuration.GetSection(ConfigurationKeys.MOUSE_STARTING_POINT));
@@ -51,6 +51,6 @@ namespace Ocetya.PeopleCounter.ReportGenerator
                         .AddTransient<IStepManager, StepManager>()
                         .AddTransient<IWin32, Win32>()
                         .AddTransient<IRunner, Runner>();
-                });
+                }).UseWindowsService();
     }
 }

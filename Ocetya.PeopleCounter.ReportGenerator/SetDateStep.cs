@@ -5,6 +5,7 @@
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
+    using Ocetya.PeopleCounter.ReportGenerator.Extensions;
     using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
     using Ocetya.PeopleCounter.ReportGenerator.Models;
     using Ocetya.PeopleCounter.ReportGenerator.StepPattern;
@@ -25,8 +26,8 @@
 
         public async Task<StepResponse> Run()
         {
-            var startingDate = DateTime.Now.AddMinutes(-16);
-            var endingDate = DateTime.Now;
+            var endingDate = DateTime.Now.RoundDown(TimeSpan.FromMinutes(15));
+            var startingDate = endingDate.AddMinutes(-15);
 
             SetCursorPos(point.X, point.Y);
             env.MouseClick();
@@ -47,7 +48,7 @@
                 .InsertText(date.Year.ToString())
                 .PressRightArrow()
                 .PressTab() //hasta aqui va la fecha, ahora va la hora
-                .InsertText(date.Hour.ToString("hh", CultureInfo.InvariantCulture))
+                .InsertText(date.ToString("hh", CultureInfo.InvariantCulture))
                 .PressRightArrow()
                 .InsertText(date.Minute.ToString())
                 .PressRightArrow()

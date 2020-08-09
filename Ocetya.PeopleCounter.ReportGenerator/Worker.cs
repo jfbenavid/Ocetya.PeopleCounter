@@ -7,6 +7,7 @@ namespace Ocetya.PeopleCounter.ReportGenerator
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Ocetya.PeopleCounter.ReportGenerator.Config;
+    using Ocetya.PeopleCounter.ReportGenerator.Extensions;
     using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
 
     public class Worker : BackgroundService
@@ -24,13 +25,17 @@ namespace Ocetya.PeopleCounter.ReportGenerator
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var nextExecution = TimeSpan.FromSeconds(15);
             while (!stoppingToken.IsCancellationRequested)
             {
                 logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await Task.Delay(nextExecution, stoppingToken);
 
                 await runner.RunFlow();
 
-                await Task.Delay(TimeSpan.FromMinutes(configuration.GetValue<int>(ConfigurationKeys.WORKER_DELAY)), stoppingToken);
+                nextExecution = TimeSpan
+                    .FromMinutes(configuration.GetValue<int>(ConfigurationKeys.WORKER_DELAY))
+                    .NextTimeSpan();
             }
         }
     }
