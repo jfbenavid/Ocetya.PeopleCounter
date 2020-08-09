@@ -13,19 +13,18 @@
     [ApiController]
     public class PeopleLogController : ControllerBase
     {
-        private readonly GranEstacionContext _db;
+        private readonly GranEstacionContext db;
 
         public PeopleLogController(GranEstacionContext db)
         {
-            _db = db;
-            _db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            this.db = db;
+            this.db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         [HttpGet]
         public async Task<IEnumerable<ChartLog>> Get()
         {
-            var data = await
-                _db.Logs
+            var data = await db.Logs
                 .Where(log => log.Date > DateTime.Today)
                 .GroupBy(log => new { log.Date })
                 .OrderBy(g => g.Key.Date)

@@ -12,19 +12,18 @@
     [ApiController]
     public class PeopleCounterController : ControllerBase
     {
-        private readonly GranEstacionContext _db;
+        private readonly GranEstacionContext db;
 
         public PeopleCounterController(GranEstacionContext db)
         {
-            _db = db;
-            _db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            this.db = db;
+            this.db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         [HttpGet]
         public async Task<CountLog> Get()
         {
-            return await
-                _db.Logs
+            return await db.Logs
                 .Where(log => log.Date > DateTime.Today)
                 .GroupBy(log => 1)
                 .Select(g => new CountLog
