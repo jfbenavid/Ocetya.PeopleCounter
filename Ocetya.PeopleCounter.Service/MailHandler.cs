@@ -15,13 +15,13 @@
 
     public abstract class MailHandler
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ILogger<Worker> logger;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
         public MailHandler(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
         {
-            _logger = logger;
-            _serviceScopeFactory = serviceScopeFactory;
+            this.logger = logger;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         protected async Task ReadStreamAsync(byte[] bytes)
@@ -90,7 +90,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Tried to convert a line with error, the line is [{lineData}]");
+                logger.LogError(ex, $"Tried to convert a line with error, the line is [{lineData}]");
             }
 
             return logs;
@@ -110,7 +110,7 @@
 
         private async Task SaveLogsAsync(IList<Log> logs)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
             await db.Logs.AddRangeAsync(logs);
@@ -119,7 +119,7 @@
 
         private async Task<bool> IsCamIdValid(int id)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
             var exists = db.Cameras.Any(cam => cam.CameraId == id);

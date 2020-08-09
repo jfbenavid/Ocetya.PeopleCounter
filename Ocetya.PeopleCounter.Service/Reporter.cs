@@ -16,14 +16,14 @@
 
     public class Reporter : MailHandler, IReporter
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IOptions<MailConfiguration> _mailConfiguration;
+        private readonly ILogger<Worker> logger;
+        private readonly MailConfiguration mailConfiguration;
 
         public Reporter(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory, IOptions<MailConfiguration> mailConfiguration)
             : base(logger, serviceScopeFactory)
         {
-            _logger = logger;
-            _mailConfiguration = mailConfiguration;
+            this.logger = logger;
+            this.mailConfiguration = mailConfiguration.Value;
         }
 
         public async Task GetAndSaveNewDataAsync()
@@ -32,16 +32,16 @@
 
             try
             {
-                await client.ConnectAsync(_mailConfiguration.Value.ImapHost, _mailConfiguration.Value.ImapPort, true);
-                await client.AuthenticateAsync(_mailConfiguration.Value.ImapUser, _mailConfiguration.Value.ImapPassword);
+                await client.ConnectAsync(mailConfiguration.ImapHost, mailConfiguration.ImapPort, true);
+                await client.AuthenticateAsync(mailConfiguration.ImapUser, mailConfiguration.ImapPassword);
 
                 var inbox = client.Inbox;
                 await inbox.OpenAsync(FolderAccess.ReadWrite);
                 var uids = await inbox.SearchAsync(
                     SearchQuery
-                    .FromContains(_mailConfiguration.Value.EmailsFrom)
+                    .FromContains(mailConfiguration.EmailsFrom)
                     .And(SearchQuery.NotSeen)
-                    .And(SearchQuery.SubjectContains(_mailConfiguration.Value.EmailSubject)));
+                    .And(SearchQuery.SubjectContains(mailConfiguration.EmailSubject)));
 
                 var messages = await inbox.FetchAsync(uids, MessageSummaryItems.UniqueId | MessageSummaryItems.BodyStructure | MessageSummaryItems.Envelope);
 
@@ -54,7 +54,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
             }
             finally
             {
@@ -70,12 +70,12 @@
                 using (var smtp = new SmtpClient())
                 {
                     smtp.MessageSent += (sender, args) =>
-                     _logger.LogWarning(args.Response);
+                     logger.LogWarning(args.Response);
 
                     smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                    await smtp.ConnectAsync(_mailConfiguration.Value.SmtpHost, _mailConfiguration.Value.SmtpPort, true);
-                    await smtp.AuthenticateAsync(_mailConfiguration.Value.SmtpUser, _mailConfiguration.Value.SmtpPassword);
+                    await smtp.ConnectAsync(mailConfiguration.SmtpHost, mailConfiguration.SmtpPort, true);
+                    await smtp.AuthenticateAsync(mailConfiguration.SmtpUser, mailConfiguration.SmtpPassword);
                     await smtp.SendAsync(message);
                     await smtp.DisconnectAsync(true);
                 }
@@ -84,7 +84,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
             }
         }
 

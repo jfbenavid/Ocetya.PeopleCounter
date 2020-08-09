@@ -35,8 +35,6 @@ namespace Ocetya.PeopleCounter.Service
             {
                 logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                await reporter.GetAndSaveNewDataAsync();
-
                 if (DateTime.Now.Hour == 23 && DateTime.Now.Minute == 30)
                 {
                     await reporter.SendMailAsync(await reportBuilder.BuildDailyReportAsync());

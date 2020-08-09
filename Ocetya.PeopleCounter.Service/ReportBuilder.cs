@@ -21,13 +21,13 @@
 
     public class ReportBuilder : IReportBuilder
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IOptions<MailConfiguration> _mailConfiguration;
+        private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly MailConfiguration mailConfiguration;
 
         public ReportBuilder(IServiceScopeFactory serviceScopeFactory, IOptions<MailConfiguration> mailConfiguration)
         {
-            _serviceScopeFactory = serviceScopeFactory;
-            _mailConfiguration = mailConfiguration;
+            this.serviceScopeFactory = serviceScopeFactory;
+            this.mailConfiguration = mailConfiguration.Value;
         }
 
         private async Task<byte[]> BuildCSV<T, TMap>(IList<T> data) where TMap : ClassMap
@@ -44,7 +44,7 @@
 
         private async Task<List<DailyReport>> GetDailyReportAsync(DateTime beginDate)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
             return await db.Logs
@@ -112,11 +112,11 @@
             var message = new MimeMessage
             {
                 Body = builder.ToMessageBody(),
-                Sender = new MailboxAddress(_mailConfiguration.Value.SmtpUser, _mailConfiguration.Value.SmtpUser),
+                Sender = new MailboxAddress(mailConfiguration.SmtpUser, mailConfiguration.SmtpUser),
                 Subject = subject,
             };
 
-            foreach (var adress in _mailConfiguration.Value.AdressesToSend)
+            foreach (var adress in mailConfiguration.AdressesToSend)
             {
                 message.To.Add(new MailboxAddress(adress, adress));
             }
