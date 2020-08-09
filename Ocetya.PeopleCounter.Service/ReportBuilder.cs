@@ -21,22 +21,22 @@
 
     public class ReportBuilder : IReportBuilder
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly IOptions<MailConfiguration> _mailConfiguration;
+        private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly MailConfiguration mailConfiguration;
 
         public ReportBuilder(IServiceScopeFactory serviceScopeFactory, IOptions<MailConfiguration> mailConfiguration)
         {
-            _serviceScopeFactory = serviceScopeFactory;
-            _mailConfiguration = mailConfiguration;
+            this.serviceScopeFactory = serviceScopeFactory;
+            this.mailConfiguration = mailConfiguration.Value;
         }
 
-        private async Task<byte[]> BuildCSV<T, T2>(List<T> data) where T2 : ClassMap
+        private async Task<byte[]> BuildCSV<T, TMap>(IList<T> data) where TMap : ClassMap
         {
             using var memoryStream = new MemoryStream();
             using TextWriter streamWriter = new StreamWriter(memoryStream);
             using var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture);
 
-            csvWriter.Configuration.RegisterClassMap<T2>();
+            csvWriter.Configuration.RegisterClassMap<TMap>();
             await csvWriter.WriteRecordsAsync(data);
 
             return await Task.FromResult(memoryStream.ToArray());
@@ -44,7 +44,7 @@
 
         private async Task<List<DailyReport>> GetDailyReportAsync(DateTime beginDate)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
             return await db.Logs
@@ -65,29 +65,10 @@
         {
             var data = await GetDailyReportAsync(DateTime.Today);
 
-            var builder = new BodyBuilder
-            {
-                TextBody = string.Empty
-            };
-
-            builder.Attachments
-                .Add(
-                    $"reporte-{DateTime.Today:dd-MM-yyyy}.csv",
-                    await BuildCSV<DailyReport, DailyReportMap>(data));
-
-            var message = new MimeMessage
-            {
-                Body = builder.ToMessageBody(),
-                Sender = new MailboxAddress(_mailConfiguration.Value.User, _mailConfiguration.Value.User),
-                Subject = "Reporte de logs diario",
-            };
-
-            foreach (var adress in _mailConfiguration.Value.AdressesToSend)
-            {
-                message.To.Add(new MailboxAddress(adress, adress));
-            }
-
-            return message;
+            return await GetMessageAsync<DailyReport, DailyReportMap>(
+                "Reporte de logs diario",
+                $"reporte-{DateTime.Today:dd-MM-yyyy}.csv",
+                data);
         }
 
         public async Task<MimeMessage> BuildDayComparisonReport()
@@ -112,24 +93,30 @@
                 })
                 .ToList();
 
+            return await GetMessageAsync<ComparisonReport, ComparisonReportMap>(
+                "Reporte de logs diario",
+                $"Comparacion_{DateTime.Today:dd-MM-yyyy}_{DateTime.Today.AddYears(-1):dd-MM-yyyy}.csv",
+                data);
+        }
+
+        private async Task<MimeMessage> GetMessageAsync<T, TMap>(string subject, string fileName, IList<T> data) where TMap : ClassMap
+        {
             var builder = new BodyBuilder
             {
                 TextBody = string.Empty
             };
 
             builder.Attachments
-                .Add(
-                    $"Comparacion_{DateTime.Today:dd-MM-yyyy}_{DateTime.Today.AddYears(-1):dd-MM-yyyy}.csv",
-                    await BuildCSV<ComparisonReport, ComparisonReportMap>(data));
+                .Add(fileName, await BuildCSV<T, TMap>(data));
 
             var message = new MimeMessage
             {
                 Body = builder.ToMessageBody(),
-                Sender = new MailboxAddress(_mailConfiguration.Value.User, _mailConfiguration.Value.User),
-                Subject = "Reporte de logs diario",
+                Sender = new MailboxAddress(mailConfiguration.SmtpUser, mailConfiguration.SmtpUser),
+                Subject = subject,
             };
 
-            foreach (var adress in _mailConfiguration.Value.AdressesToSend)
+            foreach (var adress in mailConfiguration.AdressesToSend)
             {
                 message.To.Add(new MailboxAddress(adress, adress));
             }

@@ -7,11 +7,11 @@
     [ApiController]
     public class CompareController : ControllerBase
     {
-        private readonly GranEstacionContext _db;
+        private readonly GranEstacionContext db;
 
         public CompareController(GranEstacionContext db)
         {
-            _db = db;
+            this.db = db;
         }
     }
 }

@@ -1,15 +1,16 @@
-namespace Ocetya.PeopleCounter.Service
+namespace Ocetya.PeopleCounter.ReportGenerator
 {
     using System;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.EventLog;
-    using Ocetya.PeopleCounter.Repository;
-    using Ocetya.PeopleCounter.Service.Config;
-    using Ocetya.PeopleCounter.Service.Interfaces;
+    using Ocetya.PeopleCounter.ReportGenerator.Config;
+    using Ocetya.PeopleCounter.ReportGenerator.Interfaces;
+    using Ocetya.PeopleCounter.ReportGenerator.Models;
+    using Ocetya.PeopleCounter.ReportGenerator.StepPattern;
+    using WindowsInput;
 
     public class Program
     {
@@ -33,26 +34,23 @@ namespace Ocetya.PeopleCounter.Service
                     options.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information))
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var configuration = LoadConfiguration();
-
-                    var optionsBuilder = new DbContextOptionsBuilder<GranEstacionContext>();
-                    optionsBuilder.UseNpgsql(configuration.GetConnectionString(ConnectionStrings.MIGRATION));
-                    services.AddScoped(s => new GranEstacionContext(optionsBuilder.Options));
-
-                    services.Configure<MailConfiguration>(configuration.GetSection(ConfigurationKeys.MAIL_CONFIGURATION));
+                    var _configuration = LoadConfiguration();
 
                     services
                         .AddHostedService<Worker>()
                         .Configure<EventLogSettings>(config =>
                         {
-                            config.LogName = "People Counter Service";
-                            config.SourceName = "People Counter";
+                            config.LogName = "Report Generator Service";
+                            config.SourceName = "Report Generator";
                         });
 
-                    //Dependency Injection
+                    services.Configure<Point>(_configuration.GetSection(ConfigurationKeys.MOUSE_STARTING_POINT));
+
                     services
-                        .AddTransient<IReporter, Reporter>()
-                        .AddTransient<IReportBuilder, ReportBuilder>();
+                        .AddTransient<IInputSimulator, InputSimulator>()
+                        .AddTransient<IStepManager, StepManager>()
+                        .AddTransient<IWin32, Win32>()
+                        .AddTransient<IRunner, Runner>();
                 }).UseWindowsService();
     }
 }

@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using MailKit;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using MimeKit;
@@ -14,45 +15,48 @@
 
     public abstract class MailHandler
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ILogger<Worker> logger;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
         public MailHandler(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
         {
-            _logger = logger;
-            _serviceScopeFactory = serviceScopeFactory;
+            this.logger = logger;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
-        protected async Task GetEmailAndSaveDataAsync(MimeMessage message)
+        protected async Task ReadStreamAsync(byte[] bytes)
         {
-            if (message.Attachments.ToArray().Length <= 0)
-            {
-                return;
-            }
+            using var stream = new MemoryStream(bytes);
+            using var reader = new StreamReader(stream);
 
-            foreach (var attachment in message.Attachments)
+            string[] lines = reader
+                .ReadToEnd()
+                .Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in lines)
             {
-                if (attachment is MimePart part)
+                var log = await GetLogAsync(line);
+                if (log != null)
                 {
-                    var fileName = part.FileName;
-                    if (!fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
-                        continue;
-
-                    var bytes = await GetBytesArrayToRead(part);
-
-                    using var stream = new MemoryStream(bytes);
-                    using var reader = new StreamReader(stream);
-                    string line = string.Empty;
-
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        var log = await GetLogAsync(line);
-                        if (log != null)
-                        {
-                            await SaveLogsAsync(log);
-                        }
-                    }
+                    await SaveLogsAsync(log);
                 }
+            }
+        }
+
+        protected async Task GetEmailAndSaveDataAsync(IEnumerable<BodyPartBasic> attachments, IMailFolder folder, UniqueId uid)
+        {
+            foreach (var attachment in attachments)
+            {
+                MimeEntity part = folder.GetBodyPart(uid, attachment);
+                var fileName = part.ContentDisposition?.FileName ?? attachment.ContentType.Name;
+
+                if (string.IsNullOrEmpty(fileName) ||
+                    !fileName.EndsWith(FileExtensions.CSV, StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
+                var bytes = await GetBytesArrayToRead((MimePart)part);
+
+                await ReadStreamAsync(bytes);
             }
         }
 
@@ -86,7 +90,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Tried to convert a line with error, the line is [{lineData}]");
+                logger.LogError(ex, $"Tried to convert a line with error, the line is [{lineData}]");
             }
 
             return logs;
@@ -106,7 +110,7 @@
 
         private async Task SaveLogsAsync(IList<Log> logs)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
             await db.Logs.AddRangeAsync(logs);
@@ -115,7 +119,7 @@
 
         private async Task<bool> IsCamIdValid(int id)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
             var exists = db.Cameras.Any(cam => cam.CameraId == id);

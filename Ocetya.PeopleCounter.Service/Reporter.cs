@@ -1,6 +1,7 @@
 ﻿namespace Ocetya.PeopleCounter.Service
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using MailKit;
     using MailKit.Net.Imap;
@@ -15,14 +16,14 @@
 
     public class Reporter : MailHandler, IReporter
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IOptions<MailConfiguration> _mailConfiguration;
+        private readonly ILogger<Worker> logger;
+        private readonly MailConfiguration mailConfiguration;
 
         public Reporter(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory, IOptions<MailConfiguration> mailConfiguration)
             : base(logger, serviceScopeFactory)
         {
-            _logger = logger;
-            _mailConfiguration = mailConfiguration;
+            this.logger = logger;
+            this.mailConfiguration = mailConfiguration.Value;
         }
 
         public async Task GetAndSaveNewDataAsync()
@@ -31,28 +32,29 @@
 
             try
             {
-                await client.ConnectAsync(_mailConfiguration.Value.ImapHost, _mailConfiguration.Value.ImapPort, true);
-                await client.AuthenticateAsync(_mailConfiguration.Value.User, _mailConfiguration.Value.Password);
+                await client.ConnectAsync(mailConfiguration.ImapHost, mailConfiguration.ImapPort, true);
+                await client.AuthenticateAsync(mailConfiguration.ImapUser, mailConfiguration.ImapPassword);
 
                 var inbox = client.Inbox;
                 await inbox.OpenAsync(FolderAccess.ReadWrite);
                 var uids = await inbox.SearchAsync(
                     SearchQuery
-                    .FromContains(_mailConfiguration.Value.EmailsFrom)
-                    .And(SearchQuery.NotSeen));
+                    .FromContains(mailConfiguration.EmailsFrom)
+                    .And(SearchQuery.NotSeen)
+                    .And(SearchQuery.SubjectContains(mailConfiguration.EmailSubject)));
 
-                foreach (var uid in uids)
+                var messages = await inbox.FetchAsync(uids, MessageSummaryItems.UniqueId | MessageSummaryItems.BodyStructure | MessageSummaryItems.Envelope);
+
+                foreach (var msg in messages)
                 {
-                    var message = await inbox.GetMessageAsync(uid);
+                    await GetEmailAndSaveDataAsync(msg.BodyParts, inbox, msg.UniqueId);
 
-                    await GetEmailAndSaveDataAsync(message);
-
-                    inbox.AddFlags(uid, MessageFlags.Seen, true);
+                    await inbox.AddFlagsAsync(msg.UniqueId, MessageFlags.Seen, true);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
             }
             finally
             {
@@ -68,12 +70,12 @@
                 using (var smtp = new SmtpClient())
                 {
                     smtp.MessageSent += (sender, args) =>
-                     _logger.LogWarning(args.Response);
+                     logger.LogWarning(args.Response);
 
                     smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                    await smtp.ConnectAsync(_mailConfiguration.Value.SmtpHost, _mailConfiguration.Value.SmtpPort, true);
-                    await smtp.AuthenticateAsync(_mailConfiguration.Value.User, _mailConfiguration.Value.Password);
+                    await smtp.ConnectAsync(mailConfiguration.SmtpHost, mailConfiguration.SmtpPort, true);
+                    await smtp.AuthenticateAsync(mailConfiguration.SmtpUser, mailConfiguration.SmtpPassword);
                     await smtp.SendAsync(message);
                     await smtp.DisconnectAsync(true);
                 }
@@ -82,7 +84,19 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
+            }
+        }
+
+        public async Task UploadReportFromDirectoryAsync(string path)
+        {
+            string[] fileEntries = Directory.GetFiles(path);
+
+            foreach (var fileName in fileEntries)
+            {
+                await ReadStreamAsync(File.ReadAllBytes(fileName));
+
+                File.Delete(fileName);
             }
         }
     }

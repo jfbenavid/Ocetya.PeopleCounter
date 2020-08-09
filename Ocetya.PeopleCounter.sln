@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ocetya.PeopleCounter.Web", 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{DC2E1E72-054C-44F6-8CD8-25A677D39940}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ocetya.PeopleCounter.ReportGenerator", "Ocetya.PeopleCounter.ReportGenerator\Ocetya.PeopleCounter.ReportGenerator.csproj", "{703E2A30-038E-428A-B7A1-8A1E4EB8496B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ocetya.PeopleCounter.MouseFounder", "Ocetya.PeopleCounter.MouseFounder\Ocetya.PeopleCounter.MouseFounder.csproj", "{0D840DEB-CF35-4250-9320-1979D5B7B7F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{DC2E1E72-054C-44F6-8CD8-25A677D39940}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC2E1E72-054C-44F6-8CD8-25A677D39940}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC2E1E72-054C-44F6-8CD8-25A677D39940}.Release|Any CPU.Build.0 = Release|Any CPU
+		{703E2A30-038E-428A-B7A1-8A1E4EB8496B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{703E2A30-038E-428A-B7A1-8A1E4EB8496B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{703E2A30-038E-428A-B7A1-8A1E4EB8496B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{703E2A30-038E-428A-B7A1-8A1E4EB8496B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D840DEB-CF35-4250-9320-1979D5B7B7F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D840DEB-CF35-4250-9320-1979D5B7B7F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D840DEB-CF35-4250-9320-1979D5B7B7F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D840DEB-CF35-4250-9320-1979D5B7B7F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
