@@ -7,33 +7,34 @@
 
     public class StepManager : IStepManager
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly Queue<IStep> _steps;
+        private readonly ILogger<Worker> logger;
+        private readonly Queue<IStep> steps;
 
         public StepManager(ILogger<Worker> logger)
         {
-            _logger = logger;
-            _steps = new Queue<IStep>();
+            this.logger = logger;
+            steps = new Queue<IStep>();
         }
 
         public async Task<StepManager> AddStep(IStep step)
         {
             return await Task.Run(() =>
             {
-                _steps.Enqueue(step);
+                steps.Enqueue(step);
                 return this;
             });
         }
 
         public async Task Execute()
         {
-            foreach (var step in _steps)
+            while (steps.Count > 0)
             {
+                var step = steps.Dequeue();
                 var response = await step.Run();
 
                 if (!response.ExecutedSuccessfully)
                 {
-                    _logger.LogError(response.Message);
+                    logger.LogError(response.Message);
                     break;
                 }
             }
