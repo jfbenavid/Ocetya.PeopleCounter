@@ -4,5 +4,6 @@
     {
         public const string WORKER_DELAY = "WorkerDelayInMinutes";
         public const string MOUSE_STARTING_POINT = "StartingPoint";
+        public const string MOUSE_BUTTON_POINT = "ButtonPoint";
     }
 }

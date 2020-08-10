@@ -20,13 +20,22 @@
         [DllImport("user32.dll")]
         private static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
 
+        [DllImport("user32.dll")]
+        private static extern void SetCursorPos(int x, int y);
+
         private void PressKey(VirtualKeyCode key, int times)
         {
             for (int i = 0; i < times; i++)
             {
+                Thread.Sleep(800);
                 sim.Keyboard.KeyPress(key);
-                Thread.Sleep(100);
             }
+        }
+
+        public Win32 SetCursorPosition(int x, int y)
+        {
+            SetCursorPos(x, y);
+            return this;
         }
 
         public Win32 MouseClick()

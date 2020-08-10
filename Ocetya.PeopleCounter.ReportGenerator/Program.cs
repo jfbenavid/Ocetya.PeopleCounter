@@ -34,7 +34,7 @@ namespace Ocetya.PeopleCounter.ReportGenerator
                     options.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information))
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var _configuration = LoadConfiguration();
+                    var configuration = LoadConfiguration();
 
                     services
                         .AddHostedService<Worker>()
@@ -44,7 +44,8 @@ namespace Ocetya.PeopleCounter.ReportGenerator
                             config.SourceName = "Report Generator";
                         });
 
-                    services.Configure<Point>(_configuration.GetSection(ConfigurationKeys.MOUSE_STARTING_POINT));
+                    services.Configure<Point>(configuration.GetSection(ConfigurationKeys.MOUSE_STARTING_POINT));
+                    services.Configure<ButtonPoint>(configuration.GetSection(ConfigurationKeys.MOUSE_BUTTON_POINT));
 
                     services
                         .AddTransient<IInputSimulator, InputSimulator>()

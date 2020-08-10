@@ -2,6 +2,8 @@
 {
     public interface IWin32
     {
+        Win32 SetCursorPosition(int x, int y);
+
         Win32 MouseClick();
 
         Win32 PressUpArrow(int times = 1);
