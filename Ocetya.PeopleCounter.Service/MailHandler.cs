@@ -110,19 +110,35 @@
 
         private async Task SaveLogsAsync(IList<Log> logs)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
+            try
+            {
+                using var scope = serviceScopeFactory.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
 
-            await db.Logs.AddRangeAsync(logs);
-            await db.SaveChangesAsync();
+                await db.Logs.AddRangeAsync(logs);
+                await db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An exception has ocurred in MailHandler.SaveLogsAsync");
+            }
         }
 
         private async Task<bool> IsCamIdValid(int id)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
+            var exists = false;
 
-            var exists = db.Cameras.Any(cam => cam.CameraId == id);
+            try
+            {
+                using var scope = serviceScopeFactory.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<GranEstacionContext>();
+
+                exists = db.Cameras.Any(cam => cam.CameraId == id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An exception has ocurred in MailHandler.IsCamIdValid");
+            }
 
             return await Task.FromResult(exists);
         }
